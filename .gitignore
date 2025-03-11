@@ -1,0 +1,42 @@
+# Common Node.js / NPM rules
+node_modules/              # Ignore root node_modules if you have one (e.g., for a monorepo setup)
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Common logs and build files
+*.log
+*.log.*
+*.pid
+*.seed
+*.swp
+*.swo
+
+# Environment variables (e.g. .env files for both frontend and backend)
+.env
+.env.local
+.env.*.local
+
+# Temporary or IDE-specific files
+.vscode/
+.idea/
+.DS_Store
+
+# Backend (Node.js / Express)
+# Dependency directories
+/backend/node_modules/     # Ignore backend node_modules
+/backend/dist/             # If you have build files in backend
+/backend/build/            # If you have build files in backend
+
+# Frontend (React)
+# Dependency directory
+/frontend/node_modules/    # Ignore frontend node_modules
+/frontend/build/           # Build directory for the frontend
+
+# Cache files
+.cache/
+.coverage/
+
+# OS-specific files
+Thumbs.db
+Desktop.ini
