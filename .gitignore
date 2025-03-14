@@ -24,14 +24,19 @@ yarn-error.log
 
 # Backend (Node.js / Express)
 # Dependency directories
-/backend/node_modules/     # Ignore backend node_modules
-/backend/dist/             # If you have build files in backend
-/backend/build/            # If you have build files in backend
+/server/node_modules/     # Ignore backend node_modules
+/sever/dist/             # If you have build files in backend
+/server/build/            # If you have build files in backend
 
 # Frontend (React)
 # Dependency directory
 /frontend/node_modules/    # Ignore frontend node_modules
 /frontend/build/           # Build directory for the frontend
+
+
+server/node_modules/
+frontend/node_modules/
+admin/node_modules/
 
 # Cache files
 .cache/
