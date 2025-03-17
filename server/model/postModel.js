@@ -4,6 +4,7 @@ const PostSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Post author
     description: { type: String, required: true }, // Required post content
+    image: { type: String }, //optional to add
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Users who liked the post
     comments: [
       {

@@ -13,7 +13,6 @@ const Auth = () => {
     password: "",
   });
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // Track current image index
-  const [timeLeft, setTimeLeft] = useState(5); // Time left for the current image
   const navigate = useNavigate();
 
   // Array of images for the carousel
@@ -27,7 +26,6 @@ const Auth = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-      setTimeLeft(5); // Reset time left when the image changes
     }, 5000); // 5000ms = 5 seconds
 
     return () => clearInterval(interval); // Cleanup interval on unmount
@@ -36,7 +34,6 @@ const Auth = () => {
   // Update time left every second
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
     }, 1000); // Update every second
 
     return () => clearInterval(timer); // Cleanup timer on unmount
@@ -76,13 +73,9 @@ const Auth = () => {
             />
           </div>
 
-          {/* Time Left Indicator */}
-          <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 px-3 py-1 rounded-full text-sm">
-            {timeLeft}s
-          </div>
 
           {/* Progress Bars */}
-          <div className="absolute bottom-4 right-4 flex gap-1">
+          <div className="absolute bottom-10 right-35 flex gap-1">
             {images.map((_, index) => (
               <div
                 key={index}
@@ -155,8 +148,8 @@ const Auth = () => {
             />
 
             {!isLogin && (
-              <div className="flex items-center">
-                <input type="checkbox" id="terms" className="mr-2" required />
+              <div className="flex items-center justify-center">
+                <input type="checkbox" id="terms" className="mr-2" required checked/>
                 <label htmlFor="terms" className="text-gray-400">
                   I agree to the terms and conditions
                 </label>

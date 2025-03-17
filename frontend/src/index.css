@@ -3,4 +3,10 @@
 body{
   background: #000000;
   color: white;
+  font-family:  "Outfit", sans-serif;
 }
+
+::-webkit-scrollbar{
+  display: none;
+}
+
