@@ -1,6 +1,6 @@
 import React from "react";
 
-const Post = () => {
+const Post = ({ post }) => {
   return (
     <div className="post-container bg-gray-800 rounded-lg p-4 mb-4 shadow-lg">
       {/* Post Top Section */}
@@ -9,52 +9,50 @@ const Post = () => {
         <div className="profile">
           <img
             className="w-12 h-12 rounded-full object-cover"
-            src="https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D"
-            alt="Profile"
+            src={post.profilePic}
+            alt={post.username}
           />
         </div>
 
         {/* Profile Description */}
         <div className="profile-description flex-1">
-          <div className="name-designation">
-            <h3 className="text-white font-bold">User Name</h3>
-            <p className="text-sm text-gray-400">Software Developer</p>
-          </div>
-          <div className="time">
-            <p className="text-xs text-gray-500">Posted 4m ago</p>
-          </div>
+          <h3 className="text-white font-bold">{post.username}</h3>
+          <p className="text-sm text-gray-400">{post.jobTitle}</p>
+          <p className="text-xs text-gray-500">
+            Posted {new Date(post.timeAgo).toLocaleString()}
+          </p>
         </div>
       </div>
 
       {/* Post Middle Section */}
       <div className="post-middle-div mt-4">
-        {/* Image Container */}
-        <div className="img-container">
-          <img
-            className="w-full h-auto rounded-lg"
-            src="https://a-static.besthdwallpaper.com/deadpool-and-moon-size-behind-him-wallpaper-1920x1440-102297_25.jpg"
-            alt="Post Image"
-          />
-        </div>
+        {/* Image Container (Only if image exists) */}
+        {post.image && (
+          <div className="img-container w-full max-h-[500px] overflow-hidden rounded-lg flex justify-center">
+            <img
+              className="w-auto max-w-full h-auto max-h-[500px] object-contain"
+              src={post.image}
+              alt="Post Image"
+            />
+          </div>
+        )}
 
         {/* Post Description */}
         <div className="post-description mt-3">
-          <p className="text-white">
-            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Repellat,
-            est voluptates veniam quidem ea vel optio maxime assumenda eveniet,
-            sint atque a blanditiis nesciunt quia beatae quod itaque veritatis
-            quam.
-          </p>
+          <p className="text-white">{post.description}</p>
         </div>
       </div>
 
       {/* Analytics Section */}
       <div className="analytics flex justify-between mt-4 text-gray-400">
         <div className="reactions">
-          <p>20k reactions</p>
+          <p>{post.reactions} reactions</p>
         </div>
         <div className="comments">
-          <p>2k comments</p>
+          <p>{post.comments} comments</p>
+        </div>
+        <div className="shares">
+          <p>{post.shares} shares</p>
         </div>
       </div>
 

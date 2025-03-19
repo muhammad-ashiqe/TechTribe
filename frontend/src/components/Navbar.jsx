@@ -43,14 +43,14 @@ const Navbar = () => {
         {/* Home Link */}
         <div className="home-container bg-white text-violet-600 px-5 py-2 rounded-4xl ">
           <p className=" cursor-pointer">
-            <i class="fa-solid fa-house mr-2"></i>Home
+            <i className="fa-solid fa-house mr-2"></i>Home
           </p>
         </div>
 
         {/* Notifications Icon */}
         <div className="notification-icon relative">
           <p className="text-white hover:text-blue-500 transition duration-300 cursor-pointer">
-            <i class="fa-solid fa-bell text-2xl"></i>
+            <i className ="fa-solid fa-bell text-2xl"></i>
           </p>
           <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
             3
@@ -71,7 +71,7 @@ const Navbar = () => {
         {/* Menu */}
         <div className="menu-container">
           <p className="text-white hover:text-blue-500 transition duration-300 cursor-pointer">
-          <i class="fa-solid fa-grip  text-2xl"></i>
+          <i className="fa-solid fa-grip  text-2xl"></i>
           </p>
         </div>
       </div>

@@ -1,6 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
+import CreatePostModal from "./CreatePostModal"; // Import the modal component
 
 const CreatePost = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
+
+  // Function to handle option clicks
+  const handleOptionClick = () => {
+    setIsModalOpen(true); // Open the modal
+  };
+
   return (
     <div className="post-content w-full p-4 bg-gray-800 rounded-2xl">
       <div className="flex items-center gap-3">
@@ -23,7 +31,10 @@ const CreatePost = () => {
         </div>
 
         {/* Post Button */}
-        <button className="bg-white p-2 rounded-full hover:bg-blue-600 transition-colors">
+        <button
+          className="bg-white p-2 rounded-full hover:bg-blue-600 transition-colors"
+          onClick={handleOptionClick} // Open modal when Post button is clicked
+        >
           <img
             className="w-6 h-6"
             src="https://cdn-icons-png.flaticon.com/512/4926/4926616.png"
@@ -32,21 +43,32 @@ const CreatePost = () => {
         </button>
       </div>
 
-      {/* Bottom Div*/}
+      {/* Bottom Div */}
       <div className="bottom-div flex items-center justify-center px-15 gap-4 mt-4 w-full">
-        <div className="image-div flex-1 flex gap-2 items-center justify-center border border-gray-700 p-2 rounded-lg cursor-pointer hover:bg-gray-800 transition-colors">
-        <i className="fa-regular fa-image"></i>
+        {/* Image Option */}
+        <div
+          className="image-div flex-1 flex gap-2 items-center justify-center border border-gray-700 p-2 rounded-lg cursor-pointer hover:bg-gray-800 transition-colors"
+          onClick={handleOptionClick} // Open modal when Image option is clicked
+        >
+          <i className="fa-regular fa-image"></i>
           <p className="text-sm text-gray-400">Image</p>
         </div>
-        <div className="thread-div flex-1 flex gap-2 items-center justify-center border border-gray-700 p-2 rounded-lg cursor-pointer hover:bg-gray-800 transition-colors">
-        <i className="fa-regular fa-file-lines"></i>
+
+        {/* Thread Option */}
+        <div
+          className="thread-div flex-1 flex gap-2 items-center justify-center border border-gray-700 p-2 rounded-lg cursor-pointer hover:bg-gray-800 transition-colors"
+          onClick={handleOptionClick} // Open modal when Thread option is clicked
+        >
+          <i className="fa-regular fa-file-lines"></i>
           <p className="text-sm text-gray-400">Thread</p>
         </div>
-        <div className="schedule-div flex-1 flex gap-2 items-center justify-center border border-gray-700 p-2 rounded-lg cursor-pointer hover:bg-gray-800 transition-colors">
-        <i class="fa-regular fa-calendar"></i>
-          <p className="text-sm text-gray-400">Schedule</p>
-        </div>
       </div>
+
+      {/* Modal */}
+      <CreatePostModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)} // Close modal
+      />
     </div>
   );
 };

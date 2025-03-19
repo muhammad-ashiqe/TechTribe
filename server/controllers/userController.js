@@ -104,4 +104,58 @@ const loginUser = async (req, res) => {
   }
 };
 
-export { registerUser, loginUser };
+
+//get user profile
+const getUserProfile = async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized. No token provided." });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+
+    const user = await User.findById(userId)
+      .select("-password") // Exclude password
+      .populate("followers", "firstName lastName profilePic") // Populate followers with name & profile pic
+      .populate("following", "firstName lastName profilePic"); // Populate following with name & profile pic
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      profilePic: user.profilePic,
+      jobTitle: user.jobTitle,
+      company: user.company,
+      bio: user.bio,
+      followers: user.followers.length, // Count of followers
+      following: user.following.length, // Count of following
+    });
+  } catch (error) {
+    console.error("Error fetching user profile:", error.message);
+    res.status(500).json({ message: "Server error. Please try again later." });
+  }
+};
+
+
+//get suggession users
+const getSuggestedUsers = async (req, res) => {
+  try {
+    const users = await User.find()
+      .select("firstName lastName profilePic jobTitle") // Fetch only needed fields
+      .limit(10); // Limit the number of users (optional)
+
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+export { registerUser, loginUser ,getUserProfile ,getSuggestedUsers};

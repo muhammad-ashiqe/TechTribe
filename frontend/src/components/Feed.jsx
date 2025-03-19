@@ -1,17 +1,33 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import CreatePost from "./CreatePost";
 import Post from "./Post";
 
 const Feed = () => {
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await axios.get("http://localhost:7000/api/post/getAllPost");
+        setPosts(response.data);
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
   return (
     <>
-      {/* Post Create Section */}
       <CreatePost />
-
-      {/* Feed Section */}
-      <div className="feed w-full py-4 bg-black roundedt-t-2xl min-h-[80vh]">
-        {/*1st post */}
-        <Post />
+      <div className="feed w-full py-4 bg-black rounded-t-2xl min-h-[80vh]">
+        {posts.length > 0 ? (
+          posts.map((post) => <Post key={post.id} post={post} />)
+        ) : (
+          <p className="text-white text-center">No posts available</p>
+        )}
       </div>
     </>
   );
