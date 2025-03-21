@@ -4,7 +4,7 @@ import TendingTopics from './TendingTopics'
 
 const RightHomeSection = () => {
   return (
-    <div className="right w-[25%] ">
+    <div className="right w-[25%] bg-black">
     {/* Subscribe to Premium */}
     <SubscribeToPremium />
 

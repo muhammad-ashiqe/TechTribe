@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
 
 const ProfileCard = () => {
   const [user, setUser] = useState(null);
 
+  const navigate = useNavigate()
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -26,7 +29,7 @@ const ProfileCard = () => {
 
   if (!user) return <p>Loading...</p>;
 
-  console.log(user)
+  
   return (
     <div className="flex flex-col bg-gray-800 rounded-xl overflow-hidden shadow-lg text-white ">
       {/* Banner */}
@@ -67,7 +70,7 @@ const ProfileCard = () => {
       </div>
 
       {/* My Profile Section */}
-      <div className="p-4 border-t border-gray-700 text-center cursor-pointer hover:bg-gray-700 transition duration-300 text-xs font-semibold">
+      <div onClick={()=>navigate("/myprofile")} className="p-4 border-t border-gray-700 text-center cursor-pointer hover:bg-gray-700 transition duration-300 text-xs font-semibold">
         My Profile
       </div>
     </div>

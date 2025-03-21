@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import LandingPage from "./pages/LandingPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ToastContainer, toast } from "react-toastify";
+import MyProfile from "./pages/MyProfile";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         {/* Protected Home Page */}
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<Home />} />
+          <Route path="/myprofile" element={<MyProfile />} />
         </Route>
       </Routes>
     </>

@@ -66,7 +66,9 @@ const loginUser = async (req, res) => {
 
     // Validate required fields
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required." });
+      return res
+        .status(400)
+        .json({ message: "Email and password are required." });
     }
 
     // Check if user exists
@@ -97,29 +99,32 @@ const loginUser = async (req, res) => {
       profilePic: user.profilePic,
     };
 
-    res.status(200).json({ message: "Login successful", token, user: userResponse });
+    res
+      .status(200)
+      .json({ message: "Login successful", token, user: userResponse });
   } catch (error) {
     console.error("Error in loginUser:", error);
     res.status(500).json({ message: "Server error. Please try again later." });
   }
 };
 
-
-//get user profile
+// Get user profile
 const getUserProfile = async (req, res) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
-      return res.status(401).json({ message: "Unauthorized. No token provided." });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized. No token provided." });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
 
     const user = await User.findById(userId)
-      .select("-password") // Exclude password
-      .populate("followers", "firstName lastName profilePic") // Populate followers with name & profile pic
-      .populate("following", "firstName lastName profilePic"); // Populate following with name & profile pic
+      .select("-password") // Exclude the password field
+      .populate("followers", "firstName lastName profilePic")
+      .populate("following", "firstName lastName profilePic");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -131,18 +136,29 @@ const getUserProfile = async (req, res) => {
       lastName: user.lastName,
       email: user.email,
       profilePic: user.profilePic,
+      coverPhoto: user.coverPhoto,
+      headline: user.headline,
+      location: user.location,
+      phone: user.phone,
+      website: user.website,
+      bio: user.bio,
       jobTitle: user.jobTitle,
       company: user.company,
-      bio: user.bio,
-      followers: user.followers.length, // Count of followers
-      following: user.following.length, // Count of following
+      experiences: user.experiences,
+      education: user.education,
+      skills: user.skills,
+      recommendations: user.recommendations,
+      postsCount: user.posts.length,
+      followersCount: user.followers.length,
+      followingCount: user.following.length,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     });
   } catch (error) {
     console.error("Error fetching user profile:", error.message);
     res.status(500).json({ message: "Server error. Please try again later." });
   }
 };
-
 
 //get suggession users
 const getSuggestedUsers = async (req, res) => {
@@ -158,4 +174,73 @@ const getSuggestedUsers = async (req, res) => {
   }
 };
 
-export { registerUser, loginUser ,getUserProfile ,getSuggestedUsers};
+
+
+// updated profile
+const updateUserProfile = async (req, res) => {
+  try {
+    // 1. Extract and decode the token from headers
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized - No token provided" });
+    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id; // Ensure the token was signed with { id: ... }
+
+    // 2. Extract text fields from the request body
+    const { firstName, lastName, headline, location, phone, website, bio } = req.body;
+    
+    // 3. Initialize image fields with current values from req.body (or leave them undefined)
+    let profilePic = req.body.profilePic;
+    let coverPhoto = req.body.coverPhoto;
+    
+    // 4. If files are provided (using Multer), upload them to Cloudinary
+    if (req.files && req.files.profilePic) {
+      const result = await cloudinary.uploader.upload(req.files.profilePic[0].path, {
+        folder: "profile", // adjust folder as needed
+      });
+      profilePic = result.secure_url;
+    }
+    
+    if (req.files && req.files.coverPhoto) {
+      const result = await cloudinary.uploader.upload(req.files.coverPhoto[0].path, {
+        folder: "profile",
+      });
+      coverPhoto = result.secure_url;
+    }
+
+    // 5. Update the user document with the new values
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        firstName,
+        lastName,
+        headline,
+        location,
+        phone,
+        website,
+        bio,
+        profilePic,
+        coverPhoto,
+      },
+      { new: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    return res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error updating profile:", error.message);
+    return res.status(500).json({ message: "Server error. Please try again later." });
+  }}
+
+
+
+export {
+  registerUser,
+  loginUser,
+  getUserProfile,
+  getSuggestedUsers,
+  updateUserProfile,
+};
