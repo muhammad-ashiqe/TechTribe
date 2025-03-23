@@ -1,6 +1,7 @@
 import User from "../model/userModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import cloudinary from "../config/cloudinary.js";
 
 // User registration
 const registerUser = async (req, res) => {
@@ -179,37 +180,32 @@ const getSuggestedUsers = async (req, res) => {
 // updated profile
 const updateUserProfile = async (req, res) => {
   try {
-    // 1. Extract and decode the token from headers
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) {
-      return res.status(401).json({ message: "Unauthorized - No token provided" });
-    }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.id; // Ensure the token was signed with { id: ... }
+    const userId = req.user._id; // Extracted from auth middleware
+    const { firstName, lastName, headline, location, phone, website, bio, profilePic, coverPhoto } = req.body;
 
-    // 2. Extract text fields from the request body
-    const { firstName, lastName, headline, location, phone, website, bio } = req.body;
-    
-    // 3. Initialize image fields with current values from req.body (or leave them undefined)
-    let profilePic = req.body.profilePic;
-    let coverPhoto = req.body.coverPhoto;
-    
-    // 4. If files are provided (using Multer), upload them to Cloudinary
-    if (req.files && req.files.profilePic) {
-      const result = await cloudinary.uploader.upload(req.files.profilePic[0].path, {
-        folder: "profile", // adjust folder as needed
-      });
-      profilePic = result.secure_url;
-    }
-    
-    if (req.files && req.files.coverPhoto) {
-      const result = await cloudinary.uploader.upload(req.files.coverPhoto[0].path, {
-        folder: "profile",
-      });
-      coverPhoto = result.secure_url;
+    // Use the current image URLs as fallback values
+    let profilePicUrl = profilePic || "";
+    let coverPhotoUrl = coverPhoto || "";
+
+    // Upload new profile picture if provided
+    if (req.files && req.files.profilePicFile && req.files.profilePicFile.length > 0) {
+      const avatarResult = await cloudinary.uploader.upload(
+        req.files.profilePicFile[0].path,
+        { folder: "users/profilePic" }
+      );
+      profilePicUrl = avatarResult.secure_url;
     }
 
-    // 5. Update the user document with the new values
+    // Upload new cover photo if provided
+    if (req.files && req.files.coverPhotoFile && req.files.coverPhotoFile.length > 0) {
+      const coverResult = await cloudinary.uploader.upload(
+        req.files.coverPhotoFile[0].path,
+        { folder: "users/coverPhoto" }
+      );
+      coverPhotoUrl = coverResult.secure_url;
+    }
+
+    // Update the user document with the new values
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       {
@@ -220,8 +216,8 @@ const updateUserProfile = async (req, res) => {
         phone,
         website,
         bio,
-        profilePic,
-        coverPhoto,
+        profilePic: profilePicUrl,
+        coverPhoto: coverPhotoUrl,
       },
       { new: true }
     ).select("-password");
@@ -229,11 +225,39 @@ const updateUserProfile = async (req, res) => {
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
-    return res.status(200).json(updatedUser);
+    res.status(200).json({ message: "User updated successfully", user: updatedUser });
   } catch (error) {
-    console.error("Error updating profile:", error.message);
-    return res.status(500).json({ message: "Server error. Please try again later." });
-  }}
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+//update skills 
+const updateSkills = async (req, res) => {
+  try {
+    const { skills } = req.body;
+    // Ensure skills is an array
+    if (!Array.isArray(skills)) {
+      return res.status(400).json({ message: "Skills must be an array of strings" });
+    }
+    
+    // Update the user's skills; req.user.id should be set by your auth middleware
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { skills },
+      { new: true, runValidators: true }
+    );
+    
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    res.json({ skills: updatedUser.skills });
+  } catch (error) {
+    console.error("Error updating skills:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 
 
@@ -243,4 +267,5 @@ export {
   getUserProfile,
   getSuggestedUsers,
   updateUserProfile,
+  updateSkills
 };

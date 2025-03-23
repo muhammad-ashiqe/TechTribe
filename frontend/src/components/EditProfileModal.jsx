@@ -1,4 +1,3 @@
-// EditProfileModal.jsx
 import React, { useState } from "react";
 import axios from "axios";
 
@@ -34,39 +33,50 @@ const EditProfileModal = ({ user, onClose, onProfileUpdated }) => {
     }
   };
 
-  // Upload file via your backend (which uses Cloudinary)
-  const uploadFile = async (file) => {
-    const token = localStorage.getItem("token");
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      },
-    };
-    const form = new FormData();
-    form.append("file", file);
-    const { data } = await axios.post("http://localhost:7000/api/update", form, config);
-    return data.url;
-  };
-
-  // Submit the updated profile
+  // Submit the updated profile (combined text and file data)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Upload images if new files were selected
+      const token = localStorage.getItem("token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      };
+
+      // Create FormData and include text fields
+      const form = new FormData();
+      form.append("firstName", formData.firstName);
+      form.append("lastName", formData.lastName);
+      form.append("headline", formData.headline);
+      form.append("location", formData.location);
+      form.append("phone", formData.phone);
+      form.append("website", formData.website);
+      form.append("bio", formData.bio);
+
+      // Include current image URLs as fallback values
+      form.append("profilePic", formData.profilePic);
+      form.append("coverPhoto", formData.coverPhoto);
+
+      // Append file inputs using the exact field names expected by the backend
       if (profilePicFile) {
-        const profilePicUrl = await uploadFile(profilePicFile);
-        formData.profilePic = profilePicUrl;
+        form.append("profilePicFile", profilePicFile);
       }
       if (coverPhotoFile) {
-        const coverPhotoUrl = await uploadFile(coverPhotoFile);
-        formData.coverPhoto = coverPhotoUrl;
+        form.append("coverPhotoFile", coverPhotoFile);
       }
-      const token = localStorage.getItem("token");
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      const { data } = await axios.put("http://localhost:7000/api/user/update", formData, config);
-      onProfileUpdated(data);
+
+      // Send the PUT request to the correct update endpoint
+      const { data } = await axios.put(
+        "http://localhost:7000/api/user/update",
+        form,
+        config
+      );
+
+      // Call the callback to update profile state in parent and close modal
+      onProfileUpdated(data.user);
       onClose();
     } catch (err) {
       setError(err.response?.data?.message || err.message);

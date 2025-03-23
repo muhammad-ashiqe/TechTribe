@@ -69,3 +69,54 @@ export const getAllPost = async (req, res) => {
     res.status(500).json({ message: "Failed to retrieve posts" });
   }
 };
+
+
+// Fetch posts created by the authenticated user
+export const getMyPosts = async (req, res) => {
+  try {
+    const userId = req.user._id; // Get user ID from authenticated request
+
+    const posts = await Post.find({ user: userId })
+      .sort({ createdAt: -1 }) // Most recent posts first
+      .populate("user", "name profilePicture") // Populate user details
+      .populate("likes", "name") // Populate likes
+      .populate("comments.user", "name profilePicture"); // Populate comments
+
+    res.status(200).json(posts);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching your posts", error });
+  }
+};
+
+
+//delete post 
+
+export const deletePost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    // Optional: Check if the current user is authorized to delete the post
+    if (post.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Not authorized to delete this post' });
+    }
+
+    // If the post contains an image, remove it from Cloudinary
+    if (post.image && post.image.public_id) {
+      await cloudinary.uploader.destroy(post.image.public_id);
+    }
+
+    // Delete the post from the database using deleteOne()
+    await post.deleteOne();
+
+    res.json({ message: 'Post deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+

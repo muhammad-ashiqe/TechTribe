@@ -1,14 +1,42 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CreatePostModal from "./CreatePostModal"; // Import the modal component
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const CreatePost = () => {
   const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
-
-  // Function to handle option clicks
-  const handleOptionClick = () => {
-    setIsModalOpen(true); // Open the modal
-  };
-
+  const [user, setUser] = useState(null);
+  
+    const navigate = useNavigate()
+    useEffect(() => {
+      const fetchUserProfile = async () => {
+        try {
+          const token = localStorage.getItem("token");
+          if (!token) {
+            console.error("No token found. User must log in.");
+            return;
+          }
+  
+          const config = { headers: { Authorization: `Bearer ${token}` } };
+          const { data } = await axios.get("http://localhost:7000/api/user/profile", config);
+          setUser(data);
+        } catch (error) {
+          console.error("Error fetching user profile:", error.response?.data?.message || error.message);
+        }
+      };
+  
+      fetchUserProfile();
+    }, []);
+  
+    if (!user) return <p>Loading...</p>;
+  
+    
+    // Function to handle option clicks
+    const handleOptionClick = () => {
+      setIsModalOpen(true); // Open the modal
+    };
+    
+    console.log(user)
   return (
     <div className="post-content w-full p-4 bg-gray-800 rounded-2xl">
       <div className="flex items-center gap-3">
@@ -16,7 +44,7 @@ const CreatePost = () => {
         <div className="avatar-div">
           <img
             className="w-12 h-12 rounded-full object-cover"
-            src="https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D"
+            src={user.profilePic}
             alt="Profile"
           />
         </div>
