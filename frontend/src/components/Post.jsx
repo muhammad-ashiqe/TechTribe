@@ -1,11 +1,31 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const Post = ({ post }) => {
+  // Initialize state from post.isLied (provided by backend)
+  const [liked, setLiked] = useState(post.isLied || false);
+  const [likeCount, setLikeCount] = useState(post.reactions || 0);
+
+  const handleLike = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.put(
+        `http://localhost:7000/api/post/${post.id}/like`,
+        null,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Update state from the backend response
+      setLiked(response.data.isLied);
+      setLikeCount(response.data.likes.length);
+    } catch (error) {
+      console.error("Error updating like:", error);
+    }
+  };
+
   return (
     <div className="post-container bg-gray-800 rounded-lg p-4 mb-4 shadow-lg">
-      {/* Post Top Section */}
       <div className="post-top-div flex items-start gap-3">
-        {/* Profile Image */}
         <div className="profile">
           <img
             className="w-12 h-12 rounded-full object-cover"
@@ -13,8 +33,6 @@ const Post = ({ post }) => {
             alt={post.username}
           />
         </div>
-
-        {/* Profile Description */}
         <div className="profile-description flex-1">
           <h3 className="text-white font-bold">{post.username}</h3>
           <p className="text-sm text-gray-400">{post.jobTitle}</p>
@@ -23,10 +41,7 @@ const Post = ({ post }) => {
           </p>
         </div>
       </div>
-
-      {/* Post Middle Section */}
       <div className="post-middle-div mt-4">
-        {/* Image Container (Only if image exists) */}
         {post.image && (
           <div className="img-container w-full max-h-[500px] overflow-hidden rounded-lg flex justify-center">
             <img
@@ -36,31 +51,25 @@ const Post = ({ post }) => {
             />
           </div>
         )}
-
-        {/* Post Description */}
         <div className="post-description mt-3">
           <p className="text-white">{post.description}</p>
         </div>
       </div>
-
-      {/* Analytics Section */}
       <div className="analytics flex justify-between mt-4 text-gray-400">
         <div className="reactions">
-          <p>{post.reactions} reactions</p>
+          <p>{likeCount} reactions</p>
         </div>
         <div className="comments">
-          <p>{post.comments} comments</p>
+          <p>{post.comments ? post.comments.length : 0} comments</p>
         </div>
         <div className="shares">
-          <p>{post.shares} shares</p>
+          <p>{post.shares ? post.shares.length : 0} shares</p>
         </div>
       </div>
-
-      {/* Post Bottom Section */}
       <div className="post-bottom-div flex justify-around mt-4 border-t border-gray-700 pt-3">
-        <div className="like flex items-center gap-2 cursor-pointer hover:text-red-500 transition-colors">
-          <i className="fa-regular fa-heart text-lg"></i>
-          <p>Like</p>
+        <div onClick={handleLike} className="like flex items-center gap-2 cursor-pointer hover:text-red-500 transition-colors">
+          <i className={`fa-heart text-lg ${liked ? "fas" : "far"}`}></i>
+          <p>{liked ? "Unlike" : "Like"}</p>
         </div>
         <div className="comment flex items-center gap-2 cursor-pointer hover:text-blue-500 transition-colors">
           <i className="fa-regular fa-comment text-lg"></i>

@@ -1,5 +1,6 @@
 import Post from "../model/postModel.js";
 import cloudinary from "../config/cloudinary.js";
+import jwt from "jsonwebtoken"
 
 // Create a post (Text + Optional Image)
 export const createPost = async (req, res) => {
@@ -42,25 +43,32 @@ export const createPost = async (req, res) => {
 //get all the post
 export const getAllPost = async (req, res) => {
   try {
-    const posts = await Post.find()
-      .populate("user", "firstName lastName jobTitle profilePic") // Fetch user details
-      .sort({ createdAt: -1 });
+    // Get current user ID from JWT token
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "No token provided" });
 
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const currentUserId = decoded._id || decoded.id;
+
+    // Fetch posts with user details
+    const posts = await Post.find()
+      .populate("user", "firstName lastName jobTitle profilePic")
+      .sort({ createdAt: -1 })
+      .lean(); // Convert to plain JS objects
+
+    // Add isLied to each post
     const formattedPosts = posts.map((post) => ({
       id: post._id,
-      username: `${post.user?.firstName || "Unknown"} ${
-        post.user?.lastName || ""
-      }`.trim(),
+      username: `${post.user?.firstName || "Unknown"} ${post.user?.lastName || ""}`.trim(),
       jobTitle: post.user?.jobTitle || "No Job Title",
-      profilePic:
-        post.user?.profilePic ||
-        "https://res.cloudinary.com/default-profile-pic.jpg",
+      profilePic: post.user?.profilePic || "https://res.cloudinary.com/default-profile-pic.jpg",
       timeAgo: post.createdAt,
       description: post.description,
-      image: post.image || "", // Optional image
+      image: post.image || "",
       reactions: post.likes.length,
       comments: post.comments.length,
       shares: post.shares.length,
+      isLied: post.likes.some(id => id.toString() === currentUserId.toString()), // Critical fix
     }));
 
     res.status(200).json(formattedPosts);
@@ -69,6 +77,7 @@ export const getAllPost = async (req, res) => {
     res.status(500).json({ message: "Failed to retrieve posts" });
   }
 };
+
 
 
 // Fetch posts created by the authenticated user
@@ -88,20 +97,21 @@ export const getMyPosts = async (req, res) => {
   }
 };
 
-
-//delete post 
+//delete post
 
 export const deletePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
 
     if (!post) {
-      return res.status(404).json({ message: 'Post not found' });
+      return res.status(404).json({ message: "Post not found" });
     }
 
     // Optional: Check if the current user is authorized to delete the post
     if (post.user.toString() !== req.user.id) {
-      return res.status(403).json({ message: 'Not authorized to delete this post' });
+      return res
+        .status(403)
+        .json({ message: "Not authorized to delete this post" });
     }
 
     // If the post contains an image, remove it from Cloudinary
@@ -112,11 +122,51 @@ export const deletePost = async (req, res) => {
     // Delete the post from the database using deleteOne()
     await post.deleteOne();
 
-    res.json({ message: 'Post deleted successfully' });
+    res.json({ message: "Post deleted successfully" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
+// like post
+export const likePost = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader)
+      return res.status(401).json({ message: "No token provided" });
 
+    const token = authHeader.split(" ")[1];
+    if (!token)
+      return res.status(401).json({ message: "Invalid token format" });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const currentUserId = decoded._id || decoded.id;
+    if (!currentUserId)
+      return res.status(401).json({ message: "User not authorized" });
+
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    // Check if already liked
+    const isLiked = post.likes.some(id => id.toString() === currentUserId.toString());
+
+    // Toggle like
+    if (isLiked) {
+      post.likes.pull(currentUserId);
+    } else {
+      post.likes.push(currentUserId);
+    }
+
+    await post.save();
+
+    // Return updated like status and count
+    res.status(200).json({
+      _id: post._id,
+      likes: post.likes,
+      isLied: !isLiked, // Reflect the new state
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

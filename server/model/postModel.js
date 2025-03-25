@@ -2,20 +2,23 @@ import mongoose from "mongoose";
 
 const PostSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Post author
-    description: { type: String, required: true }, // Required post content
-    image: { type: String }, //optional to add
-    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Users who liked the post
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    description: { type: String, required: true },
+    image: { type: String },
+    likes: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+      default: []
+    },
     comments: [
       {
         user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
         text: String,
         createdAt: { type: Date, default: Date.now },
       },
-    ], // Comments array
-    shares: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Users who shared the post
+    ],
+    shares: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
-  { timestamps: true } // CreatedAt & UpdatedAt fields
+  { timestamps: true }
 );
 
 const Post = mongoose.model("Post", PostSchema);

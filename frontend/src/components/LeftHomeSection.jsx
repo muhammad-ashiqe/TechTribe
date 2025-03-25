@@ -5,7 +5,7 @@ import SuggestionToFollow from "./SuggestionToFollow";
 
 const LeftHomeSection = () => {
   return (
-    <div className="w-[20%] bg-black rounded-2xl  overflow-y-auto flex flex-col gap-1">
+    <div className="w-[20%]  bg-black rounded-2xl   flex flex-col gap-1 ">
       {/* Profile Card */}
       <div className="">
         <ProfileCard />

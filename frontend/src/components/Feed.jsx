@@ -9,7 +9,15 @@ const Feed = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get("http://localhost:7000/api/post/getAllPost");
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          "http://localhost:7000/api/post/getAllPost",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Send token to backend
+            },
+          }
+        );
         setPosts(response.data);
       } catch (error) {
         console.error("Error fetching posts:", error);
@@ -32,5 +40,4 @@ const Feed = () => {
     </>
   );
 };
-
 export default Feed;
