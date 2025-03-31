@@ -1,6 +1,6 @@
 import Post from "../model/postModel.js";
 import cloudinary from "../config/cloudinary.js";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 
 // Create a post (Text + Optional Image)
 export const createPost = async (req, res) => {
@@ -59,16 +59,22 @@ export const getAllPost = async (req, res) => {
     // Add isLied to each post
     const formattedPosts = posts.map((post) => ({
       id: post._id,
-      username: `${post.user?.firstName || "Unknown"} ${post.user?.lastName || ""}`.trim(),
+      username: `${post.user?.firstName || "Unknown"} ${
+        post.user?.lastName || ""
+      }`.trim(),
       jobTitle: post.user?.jobTitle || "No Job Title",
-      profilePic: post.user?.profilePic || "https://res.cloudinary.com/default-profile-pic.jpg",
+      profilePic:
+        post.user?.profilePic ||
+        "https://res.cloudinary.com/default-profile-pic.jpg",
       timeAgo: post.createdAt,
       description: post.description,
       image: post.image || "",
       reactions: post.likes.length,
       comments: post.comments.length,
       shares: post.shares.length,
-      isLied: post.likes.some(id => id.toString() === currentUserId.toString()), // Critical fix
+      isLied: post.likes.some(
+        (id) => id.toString() === currentUserId.toString()
+      ), // Critical fix
     }));
 
     res.status(200).json(formattedPosts);
@@ -78,6 +84,22 @@ export const getAllPost = async (req, res) => {
   }
 };
 
+//get single post
+export const getSinglePost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.postId)
+      .populate("user", "firstName lastName profilePic")
+      .populate("comments.user", "firstName lastName profilePic");
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    res.json(post);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 
 // Fetch posts created by the authenticated user
@@ -149,7 +171,9 @@ export const likePost = async (req, res) => {
     if (!post) return res.status(404).json({ message: "Post not found" });
 
     // Check if already liked
-    const isLiked = post.likes.some(id => id.toString() === currentUserId.toString());
+    const isLiked = post.likes.some(
+      (id) => id.toString() === currentUserId.toString()
+    );
 
     // Toggle like
     if (isLiked) {
@@ -170,3 +194,29 @@ export const likePost = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+export const commentOnPost = async(req,res)=>{
+  try {
+    const post = await Post.findById(req.params.postId);
+    
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+    
+    const newComment = {
+      user: req.user._id, 
+      text: req.body.text
+    };
+    
+    post.comments.push(newComment);
+    const updatedPost = await post.save();
+    
+    // Populate user data in the response
+    await updatedPost.populate('comments.user', 'firstName lastName profilePic');
+    
+    res.json(updatedPost);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}

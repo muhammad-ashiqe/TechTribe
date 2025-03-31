@@ -52,7 +52,7 @@ const ProfileCard = () => {
       {/* Description */}
       <div className="p-2 mt-12 text-center">
         <h3 className="text-sm font-bold">{user.firstName} {user.lastName}</h3>
-        <p className="text-gray-400 text-xs">{user.jobTitle || "Software Developer"}</p>
+        <p className="text-gray-400 text-xs">{user.headline || "Software Developer"}</p>
         <p className="text-gray-400 mt-1 text-xs">{user.bio || "Lorem ipsum dolor sit amet consectetur adipisicing elit."}</p>
       </div>
 

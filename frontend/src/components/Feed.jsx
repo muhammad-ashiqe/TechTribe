@@ -18,6 +18,7 @@ const Feed = () => {
             },
           }
         );
+        console.log(response.data);
         setPosts(response.data);
       } catch (error) {
         console.error("Error fetching posts:", error);

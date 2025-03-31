@@ -5,6 +5,7 @@ import LandingPage from "./pages/LandingPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ToastContainer, toast } from "react-toastify";
 import MyProfile from "./pages/MyProfile";
+import PostWithComments from "./pages/PostWithComments";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<Home />} />
           <Route path="/myprofile" element={<MyProfile />} />
+          <Route path="/post/:postId" element={<PostWithComments />} />
         </Route>
       </Routes>
     </>

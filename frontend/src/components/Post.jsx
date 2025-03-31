@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Post = ({ post }) => {
   // Initialize state from post.isLied (provided by backend)
   const [liked, setLiked] = useState(post.isLied || false);
   const [likeCount, setLikeCount] = useState(post.reactions || 0);
+
+  const navigate = useNavigate();
+
+  const handleCommentClick = () => {
+    navigate(`/post/${post.id}`);
+  };
 
   const handleLike = async () => {
     try {
@@ -60,18 +67,18 @@ const Post = ({ post }) => {
           <p>{likeCount} reactions</p>
         </div>
         <div className="comments">
-          <p>{post.comments ? post.comments.length : 0} comments</p>
+          <p>{post.comments} comments</p>
         </div>
         <div className="shares">
           <p>{post.shares ? post.shares.length : 0} shares</p>
         </div>
       </div>
       <div className="post-bottom-div flex justify-around mt-4 border-t border-gray-700 pt-3">
-        <div onClick={handleLike} className="like flex items-center gap-2 cursor-pointer hover:text-red-500 transition-colors">
+        <div onClick={handleLike} className="like flex items-center gap-2 cursor-pointer text-red-700 hover:text-red-500 transition-colors">
           <i className={`fa-heart text-lg ${liked ? "fas" : "far"}`}></i>
-          <p>{liked ? "Unlike" : "Like"}</p>
+          {/* <p>{liked ? "" : "Like"}</p> */}
         </div>
-        <div className="comment flex items-center gap-2 cursor-pointer hover:text-blue-500 transition-colors">
+        <div onClick={()=>handleCommentClick()}  className="comment flex items-center gap-2 cursor-pointer hover:text-blue-500 transition-colors">
           <i className="fa-regular fa-comment text-lg"></i>
           <p>Comment</p>
         </div>

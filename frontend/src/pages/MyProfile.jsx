@@ -152,7 +152,7 @@ const MyProfile = () => {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-xl font-semibold mb-2">Skills</h1>
-            <div className="text-gray-300 flex gap-5">
+            <div className="text-gray-300 flex gap-5 flex-wrap">
               {user.skills && user.skills.length > 0 ? user.skills.map((skill)=>( <p className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-full text-sm font-medium transition-colors shadow-lg">{skill}</p> )) : "No skills added yet."}
             </div>
           </div>
