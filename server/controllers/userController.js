@@ -2,6 +2,8 @@ import User from "../model/userModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import cloudinary from "../config/cloudinary.js";
+import mongoose from "mongoose";
+import Post from "../model/postModel.js";
 
 // User registration
 const registerUser = async (req, res) => {
@@ -109,7 +111,7 @@ const loginUser = async (req, res) => {
   }
 };
 
-// Get user profile
+// Get loggined user profile
 const getUserProfile = async (req, res) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
@@ -175,20 +177,32 @@ const getSuggestedUsers = async (req, res) => {
   }
 };
 
-
-
 // updated profile
 const updateUserProfile = async (req, res) => {
   try {
     const userId = req.user._id; // Extracted from auth middleware
-    const { firstName, lastName, headline, location, phone, website, bio, profilePic, coverPhoto } = req.body;
+    const {
+      firstName,
+      lastName,
+      headline,
+      location,
+      phone,
+      website,
+      bio,
+      profilePic,
+      coverPhoto,
+    } = req.body;
 
     // Use the current image URLs as fallback values
     let profilePicUrl = profilePic || "";
     let coverPhotoUrl = coverPhoto || "";
 
     // Upload new profile picture if provided
-    if (req.files && req.files.profilePicFile && req.files.profilePicFile.length > 0) {
+    if (
+      req.files &&
+      req.files.profilePicFile &&
+      req.files.profilePicFile.length > 0
+    ) {
       const avatarResult = await cloudinary.uploader.upload(
         req.files.profilePicFile[0].path,
         { folder: "users/profilePic" }
@@ -197,7 +211,11 @@ const updateUserProfile = async (req, res) => {
     }
 
     // Upload new cover photo if provided
-    if (req.files && req.files.coverPhotoFile && req.files.coverPhotoFile.length > 0) {
+    if (
+      req.files &&
+      req.files.coverPhotoFile &&
+      req.files.coverPhotoFile.length > 0
+    ) {
       const coverResult = await cloudinary.uploader.upload(
         req.files.coverPhotoFile[0].path,
         { folder: "users/coverPhoto" }
@@ -225,33 +243,37 @@ const updateUserProfile = async (req, res) => {
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.status(200).json({ message: "User updated successfully", user: updatedUser });
+    res
+      .status(200)
+      .json({ message: "User updated successfully", user: updatedUser });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-//update skills 
+//update skills
 const updateSkills = async (req, res) => {
   try {
     const { skills } = req.body;
     // Ensure skills is an array
     if (!Array.isArray(skills)) {
-      return res.status(400).json({ message: "Skills must be an array of strings" });
+      return res
+        .status(400)
+        .json({ message: "Skills must be an array of strings" });
     }
-    
+
     // Update the user's skills; req.user.id should be set by your auth middleware
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
       { skills },
       { new: true, runValidators: true }
     );
-    
+
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
-    
+
     res.json({ skills: updatedUser.skills });
   } catch (error) {
     console.error("Error updating skills:", error);
@@ -259,7 +281,69 @@ const updateSkills = async (req, res) => {
   }
 };
 
+//searchUser
+const searchUser = async (req, res) => {
+  try {
+    const { query } = req.query;
 
+    if (!query || query.trim() === "") {
+      return res.json([]);
+    }
+
+    const users = await User.find({
+      $or: [
+        { firstName: { $regex: query, $options: "i" } },
+        { lastName: { $regex: query, $options: "i" } },
+        { headline: { $regex: query, $options: "i" } },
+      ],
+    })
+      .select("firstName lastName profilePic headline")
+      .limit(10);
+
+    res.json(users || []);
+  } catch (error) {
+    console.error("Search error:", error);
+    res.status(500).json([]);
+  }
+};
+
+//get user with id 
+const getUserWithId =  async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Validate userId format
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Invalid user ID' });
+    }
+
+    // Fetch user data
+    const user = await User.findById(userId)
+      .select('-password') // Exclude sensitive fields
+      .lean(); // Convert to plain JavaScript object
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Fetch user's posts
+    const posts = await Post.find({ author: userId })
+      .sort({ createdAt: -1 }) // Newest first
+      .populate('author', 'firstName lastName profilePic') // Include author details
+      .lean();
+
+    // Combine user data with posts
+    const response = {
+      ...user,
+      posts
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
 
 export {
   registerUser,
@@ -267,5 +351,7 @@ export {
   getUserProfile,
   getSuggestedUsers,
   updateUserProfile,
-  updateSkills
+  updateSkills,
+  searchUser,
+  getUserWithId
 };

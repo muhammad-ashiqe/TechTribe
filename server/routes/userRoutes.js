@@ -2,8 +2,10 @@ import express from "express";
 import {
   getSuggestedUsers,
   getUserProfile,
+  getUserWithId,
   loginUser,
   registerUser,
+  searchUser,
   updateSkills,
   updateUserProfile,
 } from "../controllers/userController.js";
@@ -31,6 +33,10 @@ userRouter.put(
   updateUserProfile
 );
 
-userRouter.patch('/skills',authMiddleware,updateSkills)
+userRouter.patch("/skills", authMiddleware, updateSkills);
+
+userRouter.get("/search", searchUser);
+
+userRouter.get('/user-profile/:userId',getUserWithId)
 
 export default userRouter;

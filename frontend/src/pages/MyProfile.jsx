@@ -60,19 +60,31 @@ const MyProfile = () => {
   }, [navigate]);
 
   useEffect(() => {
-    const fetchRecentPosts = async () => {
+    const fetchUserPosts = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
-        const config = { headers: { Authorization: `Bearer ${token}` } };
-        const { data } = await axios.get("http://localhost:7000/api/post/my-posts", config);
-        setRecentPosts(data);
+  
+        const { data } = await axios.get(
+          "http://localhost:7000/api/post/my-posts",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        
+        setRecentPosts(data); // Store posts in state
+        console.log("User posts fetched:", data);
       } catch (err) {
-        console.error("Error fetching recent posts:", err);
+        console.error("Failed to fetch user posts:", err.response?.data || err.message);
       }
     };
-    fetchRecentPosts();
-  }, []);
+  
+    fetchUserPosts();
+  }, []); // Runs once on component mount
+  
+  
 
   if (loading) return <div>Loading profile...</div>;
   if (error) return <div>Error: {error}</div>;

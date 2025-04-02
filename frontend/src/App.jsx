@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { ToastContainer, toast } from "react-toastify";
 import MyProfile from "./pages/MyProfile";
 import PostWithComments from "./pages/PostWithComments";
+import UserProfile from "./pages/UserProfile";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/myprofile" element={<MyProfile />} />
           <Route path="/post/:postId" element={<PostWithComments />} />
+          <Route path="/profile/:userId" element={<UserProfile />} />
         </Route>
       </Routes>
     </>

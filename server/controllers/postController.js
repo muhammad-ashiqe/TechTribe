@@ -105,19 +105,67 @@ export const getSinglePost = async (req, res) => {
 // Fetch posts created by the authenticated user
 export const getMyPosts = async (req, res) => {
   try {
-    const userId = req.user._id; // Get user ID from authenticated request
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "No token" });
 
-    const posts = await Post.find({ user: userId })
-      .sort({ createdAt: -1 }) // Most recent posts first
-      .populate("user", "name profilePicture") // Populate user details
-      .populate("likes", "name") // Populate likes
-      .populate("comments.user", "name profilePicture"); // Populate comments
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id; // or decoded.userId (check your JWT payload)
+
+    // ✅ Fix: Query "user" instead of "author"
+    const posts = await Post.find({ user: userId }).sort({ createdAt: -1 });
 
     res.status(200).json(posts);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching your posts", error });
+    res.status(500).json({ message: error.message });
   }
 };
+
+//fetch posts by userId
+export const fetchUserPost = async (req, res) => {
+  try {
+    // Get current user ID from JWT token
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "No token provided" });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const currentUserId = decoded._id || decoded.id;
+    const { userId } = req.params;
+
+    // Fetch posts for specific user with user details
+    const posts = await Post.find({ user: userId })
+      .populate("user", "firstName lastName jobTitle profilePic")
+      .sort({ createdAt: -1 })
+      .lean(); // Convert to plain JS objects
+
+    // Format posts to match frontend expectations
+    const formattedPosts = posts.map((post) => ({
+      id: post._id,
+      username: `${post.user?.firstName || "Unknown"} ${
+        post.user?.lastName || ""
+      }`.trim(),
+      jobTitle: post.user?.jobTitle || "No Job Title",
+      profilePic:
+        post.user?.profilePic ||
+        "https://res.cloudinary.com/default-profile-pic.jpg",
+      timeAgo: post.createdAt,
+      description: post.description,
+      image: post.image || "",
+      reactions: post.likes.length,
+      comments: post.comments.length,
+      shares: post.shares.length,
+      isLied: post.likes.some(
+        (id) => id.toString() === currentUserId.toString()
+      ),
+    }));
+
+    res.status(200).json(formattedPosts);
+  } catch (error) {
+    console.error("Error fetching user posts:", error);
+    res.status(500).json({ message: "Failed to retrieve user posts" });
+  }
+}
+
+
 
 //delete post
 

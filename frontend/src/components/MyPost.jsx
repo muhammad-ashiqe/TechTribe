@@ -9,7 +9,7 @@ const Post = ({ post, handleDeletePost }) => {
       <div className="post-top-div flex justify-between items-start">
         {/* Profile Description */}
         <div className="profile-description">
-          <h3 className="text-white font-bold">{post.user.name}</h3>
+          {/* <h3 className="text-white font-bold">{post.user.firstName}</h3> */}
           <p className="text-xs text-gray-500">
             {new Date(post.createdAt).toLocaleString()}
           </p>
