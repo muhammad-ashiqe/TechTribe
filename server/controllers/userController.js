@@ -281,6 +281,60 @@ const updateSkills = async (req, res) => {
   }
 };
 
+
+const updateExperience =  async (req, res) => {
+  async (req, res) => {
+    // const errors = validationResult(req);
+    // if (!errors.isEmpty()) {
+    //   return res.status(400).json({ errors: errors.array() });
+    // }
+
+    try {
+      const user = await User.findById(req.user._id);
+      
+      const newExp = {
+        title: req.body.title,
+        company: req.body.company,
+        period: req.body.period,
+        description: req.body.description || ''
+      };
+
+      user.experiences.unshift(newExp);
+      await user.save();
+
+      res.json(user.experiences);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server Error');
+    }
+  }
+}
+
+
+const deleteExperience = async(req,res) =>{
+  try {
+    const user = await User.findById(req.user._id);
+
+    // Get remove index
+    const removeIndex = user.experiences
+      .map(item => item._id.toString())
+      .indexOf(req.params.exp_id);
+
+    if (removeIndex === -1) {
+      return res.status(404).json({ msg: 'Experience not found' });
+    }
+
+    user.experiences.splice(removeIndex, 1);
+    await user.save();
+
+    res.json(user.experiences);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+}
+
+
 //searchUser
 const searchUser = async (req, res) => {
   try {
@@ -345,6 +399,76 @@ const getUserWithId =  async (req, res) => {
   }
 }
 
+const followUser = async (req, res) => {
+  try {
+    // Check if user is trying to follow themselves
+    if (req.user._id.toString() === req.params.userId) {
+      return res.status(400).json({ message: "You cannot follow yourself" });
+    }
+
+    // Find the current user and the user to follow
+    const currentUser = await User.findById(req.user._id);
+    const userToFollow = await User.findById(req.params.userId);
+
+    if (!userToFollow) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if already following
+    if (currentUser.following.includes(req.params.userId)) {
+      return res.status(400).json({ message: "Already following this user" });
+    }
+
+    // Update both users
+    currentUser.following.push(req.params.userId);
+    userToFollow.followers.push(req.user._id);
+
+    await currentUser.save();
+    await userToFollow.save();
+
+    res.status(200).json({ message: "Successfully followed user" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+const unfollowUser = async (req, res) => {
+  try {
+    // Check if user is trying to unfollow themselves
+    if (req.user._id.toString() === req.params.userId) {
+      return res.status(400).json({ message: "You cannot unfollow yourself" });
+    }
+
+    // Find the current user and the user to unfollow
+    const currentUser = await User.findById(req.user._id);
+    const userToUnfollow = await User.findById(req.params.userId);
+
+    if (!userToUnfollow) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if not following
+    if (!currentUser.following.includes(req.params.userId)) {
+      return res.status(400).json({ message: "Not following this user" });
+    }
+
+    // Update both users
+    currentUser.following = currentUser.following.filter(
+      id => id.toString() !== req.params.userId
+    );
+    userToUnfollow.followers = userToUnfollow.followers.filter(
+      id => id.toString() !== req.user._id.toString()
+    );
+
+    await currentUser.save();
+    await userToUnfollow.save();
+
+    res.status(200).json({ message: "Successfully unfollowed user" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
 export {
   registerUser,
   loginUser,
@@ -353,5 +477,9 @@ export {
   updateUserProfile,
   updateSkills,
   searchUser,
-  getUserWithId
+  getUserWithId,
+  updateExperience,
+  deleteExperience,
+  followUser,
+  unfollowUser
 };

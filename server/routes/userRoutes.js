@@ -1,11 +1,15 @@
 import express from "express";
 import {
+  deleteExperience,
+  followUser,
   getSuggestedUsers,
   getUserProfile,
   getUserWithId,
   loginUser,
   registerUser,
   searchUser,
+  unfollowUser,
+  updateExperience,
   updateSkills,
   updateUserProfile,
 } from "../controllers/userController.js";
@@ -37,6 +41,11 @@ userRouter.patch("/skills", authMiddleware, updateSkills);
 
 userRouter.get("/search", searchUser);
 
-userRouter.get('/user-profile/:userId',getUserWithId)
+userRouter.get("/user-profile/:userId", getUserWithId);
 
+userRouter.post("/experience", authMiddleware,updateExperience);
+userRouter.post("/:expId", authMiddleware,deleteExperience);
+
+userRouter.post('/follow/:userId',authMiddleware,followUser)
+userRouter.post('/unfollow/:userId',authMiddleware,unfollowUser)
 export default userRouter;

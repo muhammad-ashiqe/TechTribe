@@ -165,10 +165,7 @@ export const fetchUserPost = async (req, res) => {
   }
 }
 
-
-
 //delete post
-
 export const deletePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -243,7 +240,7 @@ export const likePost = async (req, res) => {
   }
 };
 
-
+//coment on post
 export const commentOnPost = async(req,res)=>{
   try {
     const post = await Post.findById(req.params.postId);

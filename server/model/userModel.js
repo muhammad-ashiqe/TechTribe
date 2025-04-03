@@ -1,5 +1,11 @@
 import mongoose from "mongoose";
 
+const EducationSchema = new mongoose.Schema({
+  institution: { type: String, required: true, trim: true },
+  degree: { type: String, required: true, trim: true },
+  period: { type: String, required: true, trim: true },
+});
+
 const ExperienceSchema = new mongoose.Schema({
   title: { type: String, required: true, trim: true },
   company: { type: String, required: true, trim: true },
@@ -7,17 +13,6 @@ const ExperienceSchema = new mongoose.Schema({
   description: { type: String, default: "", trim: true },
 });
 
-const EducationSchema = new mongoose.Schema({
-  institution: { type: String, required: true, trim: true },
-  degree: { type: String, required: true, trim: true },
-  period: { type: String, required: true, trim: true },
-});
-
-const RecommendationSchema = new mongoose.Schema({
-  from: { type: String, required: true, trim: true },
-  position: { type: String, default: "", trim: true },
-  content: { type: String, required: true, trim: true },
-});
 
 const UserSchema = new mongoose.Schema(
   {
@@ -53,7 +48,6 @@ const UserSchema = new mongoose.Schema(
     experiences: [ExperienceSchema],
     education: [EducationSchema],
     skills: [{ type: String, trim: true }],
-    recommendations: [RecommendationSchema],
     posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
