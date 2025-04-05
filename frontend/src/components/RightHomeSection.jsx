@@ -1,17 +1,15 @@
 import React from 'react'
 import SubscribeToPremium from './SubscribeToPremium'
-import TendingTopics from './TendingTopics'
+import SuggestionToFollow from './SuggestionToFollow'
 
 const RightHomeSection = () => {
   return (
-    <div className="right w-[25%] bg-black sm:block hidden">
-    {/* Subscribe to Premium */}
-    <SubscribeToPremium />
-
-    {/* trending topics */}
-    <TendingTopics />
-  </div>
+    <div className="h-full overflow-y-auto no-scrollbar sticky top-16">
+      <div className="space-y-2">
+        <SubscribeToPremium />
+        <SuggestionToFollow />
+      </div>
+    </div>
   )
 }
-
 export default RightHomeSection

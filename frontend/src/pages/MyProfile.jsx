@@ -5,6 +5,8 @@ import EditProfileModal from "../components/EditProfileModal";
 import EditSkillsModal from "../components/EditSkillsModal"; // Import the new modal
 import MyPost from "../components/MyPost";
 import { toast } from "react-toastify";
+import AddExperienceModal from "../components/AddExperienceModal";
+import ExperienceDisplay from "../components/ExperienceDisplay"
 
 const MyProfile = () => {
   const [user, setUser] = useState(null);
@@ -15,26 +17,46 @@ const MyProfile = () => {
   const [isSkillsModalOpen, setIsSkillsModalOpen] = useState(false);
   const navigate = useNavigate();
 
+  const [isExperienceModalOpen, setIsExperienceModalOpen] = useState(false);
+
+  const handleExperienceAdded = (newExperiences) => {
+    setUser((prev) => ({ ...prev, experiences: newExperiences }));
+  };
+
+  const handleExperienceDeleted = (deletedExpId) => {
+    if (deletedExpId) {
+      setUser((prev) => ({
+        ...prev,
+        experiences: prev.experiences.filter((exp) => exp._id !== deletedExpId),
+      }));
+    } else {
+      // Trigger refresh when experience is added/updated
+      fetchUserProfile();
+    }
+  };
+
   const handleDeletePost = async (postId) => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`http://localhost:7000/api/post/${postId}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
-  
+
       if (!response.ok) {
         toast.error("Something went wrong");
-        throw new Error('Failed to delete post');
+        throw new Error("Failed to delete post");
       }
-  
+
       // Remove the post from state
-      setRecentPosts(prevPosts => prevPosts.filter(post => post._id !== postId));
+      setRecentPosts((prevPosts) =>
+        prevPosts.filter((post) => post._id !== postId)
+      );
       toast.success("Post deleted successfully");
     } catch (error) {
-      console.error('Error deleting post:', error);
+      console.error("Error deleting post:", error);
       toast.error("Something went wrong");
     }
   };
@@ -48,7 +70,10 @@ const MyProfile = () => {
           return;
         }
         const config = { headers: { Authorization: `Bearer ${token}` } };
-        const { data } = await axios.get("http://localhost:7000/api/user/profile", config);
+        const { data } = await axios.get(
+          "http://localhost:7000/api/user/profile",
+          config
+        );
         setUser(data);
       } catch (err) {
         setError(err.response?.data?.message || err.message);
@@ -64,7 +89,7 @@ const MyProfile = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
-  
+
         const { data } = await axios.get(
           "http://localhost:7000/api/post/my-posts",
           {
@@ -73,18 +98,19 @@ const MyProfile = () => {
             },
           }
         );
-        
+
         setRecentPosts(data); // Store posts in state
         console.log("User posts fetched:", data);
       } catch (err) {
-        console.error("Failed to fetch user posts:", err.response?.data || err.message);
+        console.error(
+          "Failed to fetch user posts:",
+          err.response?.data || err.message
+        );
       }
     };
-  
+
     fetchUserPosts();
   }, []); // Runs once on component mount
-  
-  
 
   if (loading) return <div>Loading profile...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -120,7 +146,10 @@ const MyProfile = () => {
             <div className="mt-2 text-sm text-gray-400">
               <span>{user.location}</span>
               <span className="mx-2">•</span>
-              <a href={`mailto:${user.email}`} className="hover:text-blue-400 transition-colors">
+              <a
+                href={`mailto:${user.email}`}
+                className="hover:text-blue-400 transition-colors"
+              >
                 Contact info
               </a>
               <p>{user.website}</p>
@@ -142,15 +171,17 @@ const MyProfile = () => {
         {/* Stats */}
         <div className="flex gap-6 my-6 py-4 border-y border-gray-700">
           <div className="text-center">
-            <span className="font-bold block">{user.followers?.length || 0}</span>
+            <span className="font-bold block">
+              {user.followersCount || 0}
+            </span>
             <span className="text-sm text-gray-400">Followers</span>
           </div>
           <div className="text-center">
-            <span className="font-bold block">{user.following?.length || 0}</span>
+            <span className="font-bold block">{user.followingCount}</span>
             <span className="text-sm text-gray-400">Following</span>
           </div>
           <div className="text-center">
-            <span className="font-bold block">{user.posts?.length || 0}</span>
+            <span className="font-bold block">{recentPosts?.length || 0}</span>
             <span className="text-sm text-gray-400">Posts</span>
           </div>
         </div>
@@ -165,7 +196,13 @@ const MyProfile = () => {
           <div>
             <h1 className="text-xl font-semibold mb-2">Skills</h1>
             <div className="text-gray-300 flex gap-5 flex-wrap">
-              {user.skills && user.skills.length > 0 ? user.skills.map((skill)=>( <p className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-full text-sm font-medium transition-colors shadow-lg">{skill}</p> )) : "No skills added yet."}
+              {user.skills && user.skills.length > 0
+                ? user.skills.map((skill) => (
+                    <p className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-full text-sm font-medium transition-colors shadow-lg">
+                      {skill}
+                    </p>
+                  ))
+                : "No skills added yet."}
             </div>
           </div>
           <button
@@ -177,15 +214,23 @@ const MyProfile = () => {
         </div>
 
         {/* Experience Section */}
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-xl font-semibold mb-2">Experience</h1>
-            <hr />
-          </div>
-          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-full text-sm font-medium transition-colors shadow-lg">
+        <div className="mb-6 px-4 sm:px-8">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-xl font-semibold">Experience</h1>
+          <button
+            onClick={() => setIsExperienceModalOpen(true)}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-full text-sm font-medium"
+          >
             Add Experience
           </button>
         </div>
+
+        <ExperienceDisplay
+          experiences={user.experiences || []}
+          onExperienceDeleted={handleExperienceDeleted}
+          editable={true}
+        />
+      </div>
 
         {/* Recent Activity */}
         <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
@@ -194,7 +239,11 @@ const MyProfile = () => {
           <section className="mb-8">
             <div className="space-y-4">
               {recentPosts.map((post, index) => (
-                <MyPost key={index} post={post} handleDeletePost={handleDeletePost} />
+                <MyPost
+                  key={index}
+                  post={post}
+                  handleDeletePost={handleDeletePost}
+                />
               ))}
             </div>
           </section>
@@ -218,6 +267,13 @@ const MyProfile = () => {
           onSkillsUpdated={(updatedSkills) =>
             setUser((prevUser) => ({ ...prevUser, skills: updatedSkills }))
           }
+        />
+      )}
+     {isExperienceModalOpen && (
+        <AddExperienceModal
+          user={user}
+          onClose={() => setIsExperienceModalOpen(false)}
+          onExperienceAdded={handleExperienceAdded}
         />
       )}
     </div>

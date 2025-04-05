@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  addExperience,
   deleteExperience,
   followUser,
   getSuggestedUsers,
@@ -43,9 +44,10 @@ userRouter.get("/search", searchUser);
 
 userRouter.get("/user-profile/:userId", getUserWithId);
 
-userRouter.post("/experience", authMiddleware,updateExperience);
-userRouter.post("/:expId", authMiddleware,deleteExperience);
+userRouter.post("/experience", authMiddleware, addExperience);
+userRouter.put("/experiences/:id", authMiddleware, updateExperience);
+userRouter.delete("/experiences/:id", authMiddleware, deleteExperience);
 
-userRouter.post('/follow/:userId',authMiddleware,followUser)
-userRouter.post('/unfollow/:userId',authMiddleware,unfollowUser)
+userRouter.post("/follow/:userId", authMiddleware, followUser);
+userRouter.post("/unfollow/:userId", authMiddleware, unfollowUser);
 export default userRouter;

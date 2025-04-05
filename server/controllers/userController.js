@@ -282,57 +282,91 @@ const updateSkills = async (req, res) => {
 };
 
 
-const updateExperience =  async (req, res) => {
-  async (req, res) => {
-    // const errors = validationResult(req);
-    // if (!errors.isEmpty()) {
-    //   return res.status(400).json({ errors: errors.array() });
-    // }
-
-    try {
-      const user = await User.findById(req.user._id);
-      
-      const newExp = {
-        title: req.body.title,
-        company: req.body.company,
-        period: req.body.period,
-        description: req.body.description || ''
-      };
-
-      user.experiences.unshift(newExp);
-      await user.save();
-
-      res.json(user.experiences);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server Error');
-    }
-  }
-}
-
-
-const deleteExperience = async(req,res) =>{
+// Add new experience
+const addExperience = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
-
-    // Get remove index
-    const removeIndex = user.experiences
-      .map(item => item._id.toString())
-      .indexOf(req.params.exp_id);
-
-    if (removeIndex === -1) {
-      return res.status(404).json({ msg: 'Experience not found' });
+    const { title, company, period, description } = req.body;
+    
+    if (!title || !company || !period) {
+      return res.status(400).json({ message: "Title, company and period are required" });
     }
 
-    user.experiences.splice(removeIndex, 1);
-    await user.save();
+    const newExperience = {
+      title,
+      company,
+      period,
+      description: description || ""
+    };
 
-    res.json(user.experiences);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $push: { experiences: newExperience } },
+      { new: true }
+    );
+
+    res.status(201).json({ experiences: user.experiences });
+  } catch (error) {
+    console.error("Error adding experience:", error);
+    res.status(500).json({ message: "Server error" });
   }
-}
+};
+
+
+// Update experience
+const updateExperience = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, company, period, description } = req.body;
+
+    if (!title || !company || !period) {
+      return res.status(400).json({ message: "Title, company and period are required" });
+    }
+
+    const user = await User.findOneAndUpdate(
+      { _id: req.user._id, "experiences._id": id },
+      {
+        $set: {
+          "experiences.$.title": title,
+          "experiences.$.company": company,
+          "experiences.$.period": period,
+          "experiences.$.description": description || ""
+        }
+      },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "Experience not found" });
+    }
+
+    res.json({ experiences: user.experiences });
+  } catch (error) {
+    console.error("Error updating experience:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Delete experience
+const deleteExperience = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $pull: { experiences: { _id: id } } },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ experiences: user.experiences });
+  } catch (error) {
+    console.error("Error deleting experience:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 
 //searchUser
@@ -478,6 +512,7 @@ export {
   updateSkills,
   searchUser,
   getUserWithId,
+  addExperience,
   updateExperience,
   deleteExperience,
   followUser,

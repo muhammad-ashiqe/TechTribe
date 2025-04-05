@@ -1,61 +1,101 @@
-import React from "react";
+import React, { useState } from "react";
 import SearchBar from "./SearchBar";
+import { FaHome, FaBell, FaGripHorizontal, FaSearch, FaTimes } from "react-icons/fa";
 
 const Navbar = () => {
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+
+  const toggleMobileSearch = () => {
+    setShowMobileSearch(!showMobileSearch);
+  };
+
   return (
-    <div className="flex items-center justify-between px-20 py-4 bg-black shadow-lg">
-      {/* Left Container */}
-      <div className="left-container flex items-center space-x-6">
-        {/* Logo */}
-        <div className="logo-container">
-          <img
-            src="https://pngimg.com/d/twitter_PNG3.png"
-            alt="Logo"
-            className="h-10 w-10 object-cover rounded-full"
-          />
+    <div className="relative">
+      {/* Mobile Search Bar - Absolute positioned overlay */}
+      {showMobileSearch && (
+        <div className="sm:hidden absolute top-0 left-0 right-0 z-50 bg-black p-3 border-b border-gray-800 flex items-center">
+          {/* Logo - Visible in mobile search mode */}
+          <div className="flex-shrink-0 mr-2">
+            <img
+              src="https://pngimg.com/d/twitter_PNG3.png"
+              alt="Logo"
+              className="h-8 w-8 object-cover rounded-full"
+            />
+          </div>
+          
+          {/* Search Input - Takes remaining space */}
+          <div className="flex-grow mx-2">  {/* Added mx-2 for horizontal spacing */}
+            <SearchBar />
+          </div>
+          
+          {/* Close Button with more spacing */}
+          <button 
+            onClick={toggleMobileSearch}
+            className="flex-shrink-0 text-gray-400 hover:text-white ml-2"  // ml-2 provides spacing
+          >
+            <FaTimes className="text-xl" />
+          </button>
         </div>
+      )}
 
-        {/* Search Input */}
-        <div className="input-container relative">
-          <SearchBar />
-        </div>
-      </div>
+      {/* Rest of your navbar code remains exactly the same */}
+      <div className={`flex items-center justify-between px-4 sm:px-6 md:px-10 lg:px-20 py-3 bg-black border-b border-gray-800 sticky top-0 z-40 ${showMobileSearch ? 'sm:opacity-100 opacity-0' : 'opacity-100'}`}>
+        {/* Left Container */}
+        <div className="flex items-center space-x-4 sm:space-x-6 w-full max-w-[600px]">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <img
+              src="https://pngimg.com/d/twitter_PNG3.png"
+              alt="Logo"
+              className="h-8 w-8 sm:h-10 sm:w-10 object-cover rounded-full hover:opacity-90 transition"
+            />
+          </div>
 
-      {/* Right Container */}
-      <div className="right-container flex items-center space-x-8">
-        {/* Home Link */}
-        <div className="home-container bg-white text-violet-600 px-5 py-2 rounded-4xl ">
-          <p className=" cursor-pointer">
-            <i className="fa-solid fa-house mr-2"></i>Home
-          </p>
-        </div>
-
-        {/* Notifications Icon */}
-        <div className="notification-icon relative">
-          <p className="text-white hover:text-blue-500 transition duration-300 cursor-pointer">
-            <i className ="fa-solid fa-bell text-2xl"></i>
-          </p>
-          <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
-            3
+          {/* Search Input - Hidden on small screens */}
+          <div className="hidden sm:block flex-grow">
+            <SearchBar />
           </div>
         </div>
 
-        {/* Profile Image */}
-        <div className="profile">
-          <div className="img-container">
+        {/* Right Container */}
+        <div className="flex items-center space-x-4 sm:space-x-6">
+          {/* Mobile Search Icon - Shows only on small screens */}
+          <div 
+            className="sm:hidden text-white cursor-pointer"
+            onClick={toggleMobileSearch}
+          >
+            <FaSearch className="h-5 w-5" />
+          </div>
+
+          {/* Home Link */}
+          <div className="hidden sm:flex items-center bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition cursor-pointer">
+            <FaHome className="mr-2" />
+            <span className="font-medium">Home</span>
+          </div>
+
+          {/* Notifications Icon */}
+          <div className="relative">
+            <div className="text-gray-200 hover:text-blue-400 transition cursor-pointer p-2">
+              <FaBell className="text-xl sm:text-2xl" />
+              <div className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                3
+              </div>
+            </div>
+          </div>
+
+          {/* Profile Image */}
+          <div className="flex-shrink-0">
             <img
               src="https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D"
               alt="Profile"
-              className="h-10 w-10 object-cover rounded-full cursor-pointer hover:opacity-80 transition duration-300"
+              className="h-8 w-8 sm:h-10 sm:w-10 object-cover rounded-full cursor-pointer hover:opacity-80 transition border-2 border-transparent hover:border-blue-500"
             />
           </div>
-        </div>
 
-        {/* Menu */}
-        <div className="menu-container">
-          <p className="text-white hover:text-blue-500 transition duration-300 cursor-pointer">
-          <i className="fa-solid fa-grip  text-2xl"></i>
-          </p>
+          {/* Menu */}
+          <div className="hidden sm:hidden text-gray-200 hover:text-blue-400 transition cursor-pointer p-2">
+            <FaGripHorizontal className="text-xl sm:text-2xl" />
+          </div>
         </div>
       </div>
     </div>
