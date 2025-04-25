@@ -338,7 +338,7 @@ const UserProfile = () => {
               {userPosts.map((post) => (
                 <div
                   key={post.id}
-                  className="p-5 bg-gray-800 rounded-xl shadow"
+                  className=""
                 >
                   <Post key={post.id} post={post} />
                 </div>

@@ -36,7 +36,7 @@ const CreatePost = () => {
       setIsModalOpen(true); // Open the modal
     };
     
-    console.log(user)
+    // console.log(user)
   return (
     <div className="post-content w-full p-4 bg-gray-800 rounded-2xl">
       <div className="flex items-center gap-3">

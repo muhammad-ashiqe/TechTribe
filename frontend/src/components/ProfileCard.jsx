@@ -6,6 +6,7 @@ const ProfileCard = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  
 
   useEffect(() => {
     const fetchUserProfile = async () => {

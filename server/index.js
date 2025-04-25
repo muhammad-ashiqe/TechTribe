@@ -4,6 +4,7 @@ import cors from "cors";
 import ConnectDB from "./config/db.js";
 import userRouter from "./routes/userRoutes.js";
 import postRouter from "./routes/postRoute.js";
+import { adminRouter } from "./routes/adminRoute.js";
 
 //env
 configDotenv();
@@ -25,6 +26,8 @@ app.get("/", (req, res) => {
 app.use("/api/user", userRouter);
 //post routes
 app.use('/api/post',postRouter)
+//admin routes
+app.use('/api/admin',adminRouter)
 
 //db connection
 await ConnectDB();
