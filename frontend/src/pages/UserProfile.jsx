@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import {
@@ -11,6 +11,7 @@ import {
   FiChevronsDown,
 } from "react-icons/fi";
 import Post from "../components/Post";
+import { SocialContext } from "../context/context";
 
 const UserProfile = () => {
   const [profileData, setProfileData] = useState(null);
@@ -22,19 +23,21 @@ const UserProfile = () => {
   const [showSkills, setShowSkills] = useState(false);
   const [showExperience, setShowExperience] = useState(false);
   const { userId } = useParams();
+  const {baseUrl,token} = useContext(SocialContext)
 
   useEffect(() => {
     const fetchProfileData = async () => {
+      
       try {
-        const token = localStorage.getItem("token");
+
         if (!token) return;
 
         // Fetch current user info and profile data in parallel for better performance
         const [currentUserResponse, profileResponse] = await Promise.all([
-          axios.get("http://localhost:7000/api/user/profile", {
+          axios.get(`${baseUrl}/user/profile`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`http://localhost:7000/api/user/user-profile/${userId}`, {
+          axios.get(`${baseUrl}/user/user-profile/${userId}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -52,7 +55,7 @@ const UserProfile = () => {
 
         // Fetch user posts separately
         const postsResponse = await axios.get(
-          `http://localhost:7000/api/post/user/${userId}`,
+          `${baseUrl}/post/user/${userId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setUserPosts(postsResponse.data);
@@ -68,7 +71,6 @@ const UserProfile = () => {
 
   const handleFollow = async () => {
     try {
-      const token = localStorage.getItem("token");
       if (!token) {
         // Handle case where user is not logged in
         return;
@@ -80,8 +82,8 @@ const UserProfile = () => {
 
       // Determine which endpoint to call based on current follow status
       const endpoint = isFollowing
-        ? `http://localhost:7000/api/user/unfollow/${userId}`
-        : `http://localhost:7000/api/user/follow/${userId}`;
+        ? `${baseUrl}/user/unfollow/${userId}`
+        : `${baseUrl}/user/follow/${userId}`;
 
       // Make the API call
       await axios.post(endpoint, {}, config);

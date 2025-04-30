@@ -1,47 +1,11 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useContext} from "react";
 import { useNavigate } from "react-router-dom";
+import { SocialContext } from "../context/context";
 
 const ProfileCard = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+
+  const {user} = useContext(SocialContext)
   const navigate = useNavigate();
-  
-
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          console.error("No token found. User must log in.");
-          navigate("/login");
-          return;
-        }
-
-        const config = { headers: { Authorization: `Bearer ${token}` } };
-        const { data } = await axios.get("http://localhost:7000/api/user/profile", config);
-        setUser(data);
-      } catch (error) {
-        console.error("Error fetching user profile:", error.response?.data?.message || error.message);
-        if (error.response?.status === 401) {
-          localStorage.removeItem("token");
-          navigate("/login");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserProfile();
-  }, [navigate]);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64 bg-gray-800 rounded-xl">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
 
   if (!user) {
     return (

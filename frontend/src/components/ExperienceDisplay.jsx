@@ -1,16 +1,17 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import AddExperienceModal from "./AddExperienceModal";
+import { SocialContext } from "../context/context";
 
 const ExperienceDisplay = ({ experiences, onExperienceDeleted, editable }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [experienceToEdit, setExperienceToEdit] = useState(null);
+  const {baseUrl,token} = useContext(SocialContext)
 
   const handleDelete = async (id) => {
     try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:7000/api/user/experiences/${id}`, {
+      await axios.delete(`${baseUrl}/user/experiences/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       onExperienceDeleted(id);

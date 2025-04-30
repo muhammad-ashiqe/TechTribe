@@ -1,14 +1,17 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import SearchBar from "./SearchBar";
 import { FaHome, FaBell, FaGripHorizontal, FaSearch, FaTimes } from "react-icons/fa";
+import { SocialContext } from "../context/context";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const navigate = useNavigate()
 
+  const {user} = useContext(SocialContext)
   const toggleMobileSearch = () => {
     setShowMobileSearch(!showMobileSearch);
   };
-
   return (
     <div className="relative">
       {/* Mobile Search Bar - Absolute positioned overlay */}
@@ -84,9 +87,9 @@ const Navbar = () => {
           </div>
 
           {/* Profile Image */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0" onClick={()=>navigate('/myprofile')}>
             <img
-              src="https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D"
+              src={user.profilePic}
               alt="Profile"
               className="h-8 w-8 sm:h-10 sm:w-10 object-cover rounded-full cursor-pointer hover:opacity-80 transition border-2 border-transparent hover:border-blue-500"
             />

@@ -1,13 +1,16 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { SocialContext } from "../context/context";
 
 const CreatePostModal = ({ isOpen, onClose }) => {
   const [description, setDescription] = useState(""); 
   const [image, setImage] = useState(null); 
   const [preview, setPreview] = useState(null); 
   const [loading, setLoading] = useState(false); 
+
+  const {baseUrl,token} = useContext(SocialContext)
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -31,8 +34,7 @@ const CreatePostModal = ({ isOpen, onClose }) => {
     if (image) formData.append("image", image);
 
     try {
-      const token = localStorage.getItem("token");
-      await axios.post("http://localhost:7000/api/post/create", formData, {
+      await axios.post(`${baseUrl}/post/create`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,

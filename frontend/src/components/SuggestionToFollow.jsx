@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import FollowProfileCard from "./FollowProfileCard";
 import { useNavigate } from "react-router-dom";
 import { FiRefreshCw } from "react-icons/fi";
+import { SocialContext } from "../context/context";
 
 const SuggestionToFollow = () => {
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const {baseUrl,token} = useContext(SocialContext)
 
   const fetchProfiles = async () => {
     try {
       setLoading(true);
-      setError(null);
-      const token = localStorage.getItem("token");
-      
-      const response = await fetch("http://localhost:7000/api/user/suggestedUsers", {
+      setError(null);      
+      const response = await fetch(`${baseUrl}/user/suggestedUsers`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

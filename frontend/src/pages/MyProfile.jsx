@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import EditProfileModal from "../components/EditProfileModal";
@@ -7,6 +7,7 @@ import MyPost from "../components/MyPost";
 import { toast } from "react-toastify";
 import AddExperienceModal from "../components/AddExperienceModal";
 import ExperienceDisplay from "../components/ExperienceDisplay"
+import { SocialContext } from "../context/context";
 
 const MyProfile = () => {
   const [user, setUser] = useState(null);
@@ -16,6 +17,7 @@ const MyProfile = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isSkillsModalOpen, setIsSkillsModalOpen] = useState(false);
   const navigate = useNavigate();
+  const {baseUrl,token} = useContext(SocialContext)
 
   const [isExperienceModalOpen, setIsExperienceModalOpen] = useState(false);
 
@@ -37,8 +39,7 @@ const MyProfile = () => {
 
   const handleDeletePost = async (postId) => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:7000/api/post/${postId}`, {
+      const response = await fetch(`${baseUrl}/post/${postId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -64,14 +65,13 @@ const MyProfile = () => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const token = localStorage.getItem("token");
         if (!token) {
           navigate("/auth");
           return;
         }
         const config = { headers: { Authorization: `Bearer ${token}` } };
         const { data } = await axios.get(
-          "http://localhost:7000/api/user/profile",
+          `${baseUrl}/user/profile`,
           config
         );
         setUser(data);
@@ -87,11 +87,10 @@ const MyProfile = () => {
   useEffect(() => {
     const fetchUserPosts = async () => {
       try {
-        const token = localStorage.getItem("token");
         if (!token) return;
 
         const { data } = await axios.get(
-          "http://localhost:7000/api/post/my-posts",
+          `${baseUrl}/post/my-posts`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

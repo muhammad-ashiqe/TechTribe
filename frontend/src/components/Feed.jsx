@@ -1,24 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import CreatePost from "./CreatePost";
 import Post from "./Post";
+import { SocialContext } from "../context/context";
 
 const Feed = () => {
   const [posts, setPosts] = useState([]);
+  const {baseUrl,token} = useContext(SocialContext)
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const token = localStorage.getItem("token");
         const response = await axios.get(
-          "http://localhost:7000/api/post/getAllPost",
+          `${baseUrl}/post/getAllPost`,
           {
             headers: {
               Authorization: `Bearer ${token}`, // Send token to backend
             },
           }
         );
-        console.log(response.data);
+        // console.log(response.data);
         setPosts(response.data);
       } catch (error) {
         console.error("Error fetching posts:", error);
@@ -26,7 +27,7 @@ const Feed = () => {
     };
 
     fetchPosts();
-  }, []);
+  }, [token]);
 
   return (
     <>

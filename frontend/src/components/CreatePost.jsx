@@ -1,24 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import CreatePostModal from "./CreatePostModal"; // Import the modal component
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { SocialContext } from "../context/context";
 
 const CreatePost = () => {
   const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
   const [user, setUser] = useState(null);
+
+  const {baseUrl,token} = useContext(SocialContext)
   
     const navigate = useNavigate()
+    
     useEffect(() => {
       const fetchUserProfile = async () => {
         try {
-          const token = localStorage.getItem("token");
           if (!token) {
             console.error("No token found. User must log in.");
             return;
           }
   
           const config = { headers: { Authorization: `Bearer ${token}` } };
-          const { data } = await axios.get("http://localhost:7000/api/user/profile", config);
+          const { data } = await axios.get(`${baseUrl}/user/profile`, config);
           setUser(data);
         } catch (error) {
           console.error("Error fetching user profile:", error.response?.data?.message || error.message);

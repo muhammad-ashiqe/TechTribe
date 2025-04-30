@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { SocialContext } from '../context/context';
 
 const PostWithComments = () => {
   const { postId } = useParams();
@@ -8,6 +9,7 @@ const PostWithComments = () => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
+  const {baseUrl,token} = useContext(SocialContext)
 
   // Get current user ID from token
   const getUserId = () => {
@@ -20,8 +22,8 @@ const PostWithComments = () => {
   useEffect(() => {
     const fetchPostAndComments = async () => {
       try {
-        const response = await axios.get(`http://localhost:7000/api/post/${postId}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        const response = await axios.get(`${baseUrl}/post/${postId}`, {
+          headers: { Authorization: `Bearer ${token}` }
         });
         setPost(response.data);
         console.log(response.data);
@@ -42,9 +44,9 @@ const PostWithComments = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:7000/api/post/${postId}/comment`,
+        `${baseUrl}/post/${postId}/comment`,
         { text: newComment },
-        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } } 
+        { headers: { Authorization: `Bearer ${token}` } } 
       );
       setComments(response.data.comments);
       setNewComment('');

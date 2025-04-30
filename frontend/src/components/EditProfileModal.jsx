@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import axios from "axios";
+import { SocialContext } from "../context/context";
 
 const EditProfileModal = ({ user, onClose, onProfileUpdated }) => {
   const [formData, setFormData] = useState({
@@ -17,6 +18,8 @@ const EditProfileModal = ({ user, onClose, onProfileUpdated }) => {
   const [coverPhotoFile, setCoverPhotoFile] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const {baseUrl,token} = useContext(SocialContext)
 
   // Update text field values
   const handleChange = (e) => {
@@ -38,7 +41,6 @@ const EditProfileModal = ({ user, onClose, onProfileUpdated }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -70,7 +72,7 @@ const EditProfileModal = ({ user, onClose, onProfileUpdated }) => {
 
       // Send the PUT request to the correct update endpoint
       const { data } = await axios.put(
-        "http://localhost:7000/api/user/update",
+        `${baseUrl}/user/update`,
         form,
         config
       );

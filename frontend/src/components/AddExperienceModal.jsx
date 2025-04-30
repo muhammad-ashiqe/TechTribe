@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { SocialContext } from "../context/context";
 
 const AddExperienceModal = ({ user, onClose, onExperienceAdded, experienceToEdit }) => {
   const [formData, setFormData] = useState({
@@ -9,6 +10,8 @@ const AddExperienceModal = ({ user, onClose, onExperienceAdded, experienceToEdit
     period: experienceToEdit?.period || "",
     description: experienceToEdit?.description || "",
   });
+
+  const {baseUrl,token} = useContext(SocialContext)
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -21,13 +24,12 @@ const AddExperienceModal = ({ user, onClose, onExperienceAdded, experienceToEdit
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
       if (experienceToEdit) {
         // Update existing experience
         const { data } = await axios.put(
-          `http://localhost:7000/api/user/experiences/${experienceToEdit._id}`,
+          `${baseUrl}/user/experiences/${experienceToEdit._id}`,
           formData,
           config
         );
@@ -36,7 +38,7 @@ const AddExperienceModal = ({ user, onClose, onExperienceAdded, experienceToEdit
       } else {
         // Add new experience
         const { data } = await axios.post(
-          "http://localhost:7000/api/user/experience",
+          `${baseUrl}/user/experience`,
           formData,
           config
         );

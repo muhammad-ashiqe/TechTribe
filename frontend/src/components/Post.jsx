@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { SocialContext } from "../context/context";
 
 const Post = ({ post }) => {
   // Initialize state from post.isLied (provided by backend)
   const [liked, setLiked] = useState(post.isLied || false);
   const [likeCount, setLikeCount] = useState(post.reactions || 0);
+  const {baseUrl,token} = useContext(SocialContext)
 
   const navigate = useNavigate();
 
@@ -15,9 +17,8 @@ const Post = ({ post }) => {
 
   const handleLike = async () => {
     try {
-      const token = localStorage.getItem("token");
       const response = await axios.put(
-        `http://localhost:7000/api/post/${post.id}/like`,
+        `${baseUrl}/post/${post.id}/like`,
         null,
         { headers: { Authorization: `Bearer ${token}` } }
       );

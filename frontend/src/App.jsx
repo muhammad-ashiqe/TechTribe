@@ -13,11 +13,11 @@ function App() {
     <>
       <ToastContainer />
       <Routes>
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/landing" element={<LandingPage />} />
         <Route path="/auth" element={<Auth />} />
         {/* Protected Home Page */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/home" element={<Home />} />
+          <Route path="/" element={<Home />} />
           <Route path="/myprofile" element={<MyProfile />} />
           <Route path="/post/:postId" element={<PostWithComments />} />
           <Route path="/profile/:userId" element={<UserProfile />} />

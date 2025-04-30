@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { SocialContext } from "../context/context";
 
 const EditSkillsModal = ({ user, onClose, onSkillsUpdated }) => {
   // Start with the user's existing skills (or an empty array)
   const [skills, setSkills] = useState(user.skills || []);
   const [newSkill, setNewSkill] = useState("");
   const [loading, setLoading] = useState(false);
+  const {baseUrl,token} = useContext(SocialContext)
 
   // Append a new skill if it's not empty or already added
   const handleAddSkill = () => {
@@ -27,10 +29,9 @@ const EditSkillsModal = ({ user, onClose, onSkillsUpdated }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
       const config = { headers: { Authorization: `Bearer ${token}` } };
       const payload = { skills };
-      const { data } = await axios.patch("http://localhost:7000/api/user/skills", payload, config);
+      const { data } = await axios.patch(`${baseUrl}/user/skills`, payload, config);
       onSkillsUpdated(data.skills);
       toast.success("Skills updated successfully!");
       onClose();

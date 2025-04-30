@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { FiSearch, FiX } from 'react-icons/fi'; // Import icons
+import { SocialContext } from '../context/context';
 
 const SearchBar = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -9,6 +10,7 @@ const SearchBar = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef(null);
+  const {baseUrl,token} = useContext(SocialContext)
 
   // Debounce function
   const debounce = (func, delay) => {
@@ -28,7 +30,7 @@ const SearchBar = () => {
 
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:7000/api/user/search?query=${query}`);
+      const response = await axios.get(`${baseUrl}/user/search?query=${query}`);
       setSearchResults(Array.isArray(response?.data) ? response.data : []);
     } catch (error) {
       console.error('Search error:', error);

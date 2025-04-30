@@ -51,7 +51,7 @@ const Auth = () => {
         await registerUser(formData);
         toast.success("Registration successful! Welcome to our platform."); // Success toast
       }
-      navigate("/home"); // Redirect to home
+      navigate("/"); // Redirect to home
     } catch (err) {
       // Display error toast
       console.log(err);

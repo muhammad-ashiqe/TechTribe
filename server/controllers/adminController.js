@@ -232,3 +232,5 @@ export const fetchAllPosts = async (req, res) => {
     return res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
+
+
