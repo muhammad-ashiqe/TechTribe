@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import axios from "axios";
 import { SocialContext } from "../context/context";
+import { XMarkIcon, UserCircleIcon, PhotoIcon, GlobeAltIcon, DevicePhoneMobileIcon, LinkIcon, MapPinIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 
 const EditProfileModal = ({ user, onClose, onProfileUpdated }) => {
   const [formData, setFormData] = useState({
@@ -16,23 +17,43 @@ const EditProfileModal = ({ user, onClose, onProfileUpdated }) => {
   });
   const [profilePicFile, setProfilePicFile] = useState(null);
   const [coverPhotoFile, setCoverPhotoFile] = useState(null);
+  const [profilePicPreview, setProfilePicPreview] = useState(null);
+  const [coverPhotoPreview, setCoverPhotoPreview] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const {baseUrl,token} = useContext(SocialContext)
+  const { baseUrl, token } = useContext(SocialContext);
 
-  // Update text field values
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle file input changes for images
   const handleFileChange = (e) => {
     const { name, files } = e.target;
-    if (name === "profilePicFile") {
-      setProfilePicFile(files[0]);
-    } else if (name === "coverPhotoFile") {
-      setCoverPhotoFile(files[0]);
+    const file = files[0];
+    
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (name === "profilePicFile") {
+        setProfilePicPreview(reader.result);
+        setProfilePicFile(file);
+      } else if (name === "coverPhotoFile") {
+        setCoverPhotoPreview(reader.result);
+        setCoverPhotoFile(file);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = (type) => {
+    if (type === 'profile') {
+      setProfilePicPreview(null);
+      setProfilePicFile(null);
+    } else {
+      setCoverPhotoPreview(null);
+      setCoverPhotoFile(null);
     }
   };
 
@@ -88,124 +109,238 @@ const EditProfileModal = ({ user, onClose, onProfileUpdated }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-gray-800 rounded-lg w-11/12 md:w-2/3 lg:w-1/2 p-6 relative">
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white">
-          ✕
-        </button>
-        <h2 className="text-2xl font-bold mb-4">Edit Profile</h2>
-        {error && <div className="text-red-400 mb-4">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-6 rounded-2xl w-full max-w-3xl mx-4 shadow-2xl border border-gray-700 relative max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            Edit Profile
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-1.5 hover:bg-gray-700 rounded-full transition-all duration-200"
+          >
+            <XMarkIcon className="w-6 h-6 text-gray-300" />
+          </button>
+        </div>
+
+        {error && (
+          <div className="mb-6 p-3 bg-red-900/50 rounded-xl flex items-center gap-2 text-red-300 text-sm">
+            <XMarkIcon className="w-5 h-5" />
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {/* First Name */}
-            <div>
-              <label className="block mb-2">First Name</label>
+            <div className="space-y-2">
+              <label className="text-gray-300 font-medium flex items-center gap-2">
+                <UserCircleIcon className="w-5 h-5" />
+                First Name
+              </label>
               <input
                 type="text"
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                className="w-full p-2 text-gray-900 rounded"
+                className="w-full p-3 bg-gray-800/70 text-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 transition-all duration-200"
                 required
               />
             </div>
+
             {/* Last Name */}
-            <div>
-              <label className="block mb-2">Last Name</label>
+            <div className="space-y-2">
+              <label className="text-gray-300 font-medium flex items-center gap-2">
+                <UserCircleIcon className="w-5 h-5" />
+                Last Name
+              </label>
               <input
                 type="text"
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                className="w-full p-2 text-gray-900 rounded"
+                className="w-full p-3 bg-gray-800/70 text-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 transition-all duration-200"
                 required
               />
             </div>
+
             {/* Headline */}
-            <div>
-              <label className="block mb-2">Headline</label>
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-gray-300 font-medium flex items-center gap-2">
+                <PhotoIcon className="w-5 h-5" />
+                Headline
+              </label>
               <input
                 type="text"
                 name="headline"
                 value={formData.headline}
                 onChange={handleChange}
-                className="w-full p-2 text-gray-900 rounded"
+                className="w-full p-3 bg-gray-800/70 text-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 transition-all duration-200"
+                placeholder="e.g., Software Developer at Tech Corp"
               />
             </div>
+
             {/* Location */}
-            <div>
-              <label className="block mb-2">Location</label>
+            <div className="space-y-2">
+              <label className="text-gray-300 font-medium flex items-center gap-2">
+                <MapPinIcon className="w-5 h-5" />
+                Location
+              </label>
               <input
                 type="text"
                 name="location"
                 value={formData.location}
                 onChange={handleChange}
-                className="w-full p-2 text-gray-900 rounded"
+                className="w-full p-3 bg-gray-800/70 text-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 transition-all duration-200"
+                placeholder="City, Country"
               />
             </div>
+
             {/* Phone */}
-            <div>
-              <label className="block mb-2">Phone</label>
+            <div className="space-y-2">
+              <label className="text-gray-300 font-medium flex items-center gap-2">
+                <DevicePhoneMobileIcon className="w-5 h-5" />
+                Phone
+              </label>
               <input
                 type="text"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full p-2 text-gray-900 rounded"
+                className="w-full p-3 bg-gray-800/70 text-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 transition-all duration-200"
               />
             </div>
+
             {/* Website */}
-            <div>
-              <label className="block mb-2">Website</label>
+            <div className="space-y-2">
+              <label className="text-gray-300 font-medium flex items-center gap-2">
+                <LinkIcon className="w-5 h-5" />
+                Website
+              </label>
               <input
                 type="text"
                 name="website"
                 value={formData.website}
                 onChange={handleChange}
-                className="w-full p-2 text-gray-900 rounded"
+                className="w-full p-3 bg-gray-800/70 text-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 transition-all duration-200"
+                placeholder="https://"
               />
             </div>
+
             {/* Bio */}
-            <div className="md:col-span-2">
-              <label className="block mb-2">Bio</label>
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-gray-300 font-medium flex items-center gap-2">
+                <GlobeAltIcon className="w-5 h-5" />
+                Bio
+              </label>
               <textarea
                 name="bio"
                 value={formData.bio}
                 onChange={handleChange}
-                className="w-full p-2 text-gray-900 rounded"
-                rows="4"
+                className="w-full p-3 bg-gray-800/70 text-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 resize-none transition-all duration-200"
+                rows="3"
+                placeholder="Tell us about yourself..."
               />
             </div>
+
             {/* Profile Picture Upload */}
-            <div>
-              <label className="block mb-2">Profile Picture</label>
-              <input
-                type="file"
-                name="profilePicFile"
-                onChange={handleFileChange}
-                accept="image/*"
-                className="w-full p-2 text-gray-900 rounded"
-              />
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-gray-300 font-medium flex items-center gap-2">
+                <PhotoIcon className="w-5 h-5" />
+                Profile Picture
+              </label>
+              <label className="flex items-center justify-center h-32 border-2 border-dashed border-gray-600 rounded-xl hover:border-blue-400 transition-all duration-200 cursor-pointer relative overflow-hidden">
+                <input
+                  type="file"
+                  name="profilePicFile"
+                  onChange={handleFileChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                {profilePicPreview ? (
+                  <>
+                    <img 
+                      src={profilePicPreview} 
+                      alt="Profile Preview" 
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage('profile')}
+                      className="absolute top-2 right-2 p-1.5 bg-gray-900/80 hover:bg-gray-800 rounded-full transition-all duration-200"
+                    >
+                      <XMarkIcon className="w-5 h-5 text-white" />
+                    </button>
+                  </>
+                ) : (
+                  <div className="text-center p-4">
+                    <PhotoIcon className="w-8 h-8 text-gray-400 mb-2 mx-auto" />
+                    <span className="text-gray-400 text-sm">Click to upload</span>
+                  </div>
+                )}
+              </label>
             </div>
+
             {/* Cover Photo Upload */}
-            <div>
-              <label className="block mb-2">Cover Photo</label>
-              <input
-                type="file"
-                name="coverPhotoFile"
-                onChange={handleFileChange}
-                accept="image/*"
-                className="w-full p-2 text-gray-900 rounded"
-              />
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-gray-300 font-medium flex items-center gap-2">
+                <PhotoIcon className="w-5 h-5" />
+                Cover Photo
+              </label>
+              <label className="flex items-center justify-center h-32 border-2 border-dashed border-gray-600 rounded-xl hover:border-blue-400 transition-all duration-200 cursor-pointer relative overflow-hidden">
+                <input
+                  type="file"
+                  name="coverPhotoFile"
+                  onChange={handleFileChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                {coverPhotoPreview ? (
+                  <>
+                    <img 
+                      src={coverPhotoPreview} 
+                      alt="Cover Preview" 
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage('cover')}
+                      className="absolute top-2 right-2 p-1.5 bg-gray-900/80 hover:bg-gray-800 rounded-full transition-all duration-200"
+                    >
+                      <XMarkIcon className="w-5 h-5 text-white" />
+                    </button>
+                  </>
+                ) : (
+                  <div className="text-center p-4">
+                    <PhotoIcon className="w-8 h-8 text-gray-400 mb-2 mx-auto" />
+                    <span className="text-gray-400 text-sm">Click to upload</span>
+                  </div>
+                )}
+              </label>
             </div>
           </div>
-          <div className="mt-6">
+
+          <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2.5 rounded-xl bg-gray-700 hover:bg-gray-600 text-gray-300 transition-all duration-200 font-medium order-2 sm:order-1"
+            >
+              Cancel
+            </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-full text-white font-medium transition-colors"
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white font-medium flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-50 order-1 sm:order-2"
             >
-              {loading ? "Saving..." : "Save Changes"}
+              {loading ? (
+                <>
+                  <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
             </button>
           </div>
         </form>

@@ -1,104 +1,103 @@
 import React, { useContext, useState } from "react";
 import SearchBar from "./SearchBar";
-import { FaHome, FaBell, FaGripHorizontal, FaSearch, FaTimes } from "react-icons/fa";
 import { SocialContext } from "../context/context";
 import { useNavigate } from "react-router-dom";
+import { HomeIcon, BellIcon, UserCircleIcon, XMarkIcon, MagnifyingGlassIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
+import { HomeModernIcon, BellAlertIcon } from "@heroicons/react/24/solid";
 
 const Navbar = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const { user } = useContext(SocialContext);
 
-  const {user} = useContext(SocialContext)
-  const toggleMobileSearch = () => {
-    setShowMobileSearch(!showMobileSearch);
-  };
+  const toggleMobileSearch = () => setShowMobileSearch(!showMobileSearch);
+
   return (
     <div className="relative">
-      {/* Mobile Search Bar - Absolute positioned overlay */}
+      {/* Mobile Search Overlay */}
       {showMobileSearch && (
-        <div className="sm:hidden absolute top-0 left-0 right-0 z-50 bg-black p-3 border-b border-gray-800 flex items-center">
-          {/* Logo - Visible in mobile search mode */}
-          <div className="flex-shrink-0 mr-2">
-            <img
-              src="https://pngimg.com/d/twitter_PNG3.png"
-              alt="Logo"
-              className="h-8 w-8 object-cover rounded-full"
-            />
-          </div>
-          
-          {/* Search Input - Takes remaining space */}
-          <div className="flex-grow mx-2">  {/* Added mx-2 for horizontal spacing */}
+        <div className="sm:hidden absolute top-0 inset-x-0 z-50 bg-gradient-to-br from-gray-900 to-gray-800 p-4 border-b border-gray-700 flex items-center shadow-2xl">
+          <div className="flex-1 mr-4">
             <SearchBar />
           </div>
-          
-          {/* Close Button with more spacing */}
           <button 
             onClick={toggleMobileSearch}
-            className="flex-shrink-0 text-gray-400 hover:text-white ml-2"  // ml-2 provides spacing
+            className="p-2 hover:bg-gray-700/30 rounded-full transition-all duration-300"
           >
-            <FaTimes className="text-xl" />
+            <XMarkIcon className="w-6 h-6 text-gray-400 hover:text-white" />
           </button>
         </div>
       )}
 
-      {/* Rest of your navbar code remains exactly the same */}
-      <div className={`flex items-center justify-between px-4 sm:px-6 md:px-10 lg:px-20 py-3 bg-black border-b border-gray-800 sticky top-0 z-40 ${showMobileSearch ? 'sm:opacity-100 opacity-0' : 'opacity-100'}`}>
-        {/* Left Container */}
-        <div className="flex items-center space-x-4 sm:space-x-6 w-full max-w-[600px]">
+      {/* Main Navbar */}
+      <div className={`flex items-center justify-between px-4 md:px-8 py-3 bg-gradient-to-br from-gray-900 to-gray-800 border-b border-gray-700 sticky top-0 z-40 shadow-2xl ${showMobileSearch ? 'sm:opacity-100 opacity-0' : 'opacity-100'}`}>
+        {/* Left Section */}
+        <div className="flex items-center space-x-4 md:space-x-6 flex-1 max-w-3xl">
           {/* Logo */}
-          <div className="flex-shrink-0">
-            <img
-              src="https://pngimg.com/d/twitter_PNG3.png"
-              alt="Logo"
-              className="h-8 w-8 sm:h-10 sm:w-10 object-cover rounded-full hover:opacity-90 transition"
-            />
+          <div 
+            className="flex-shrink-0 cursor-pointer hover:opacity-90 transition-all duration-300"
+            onClick={() => navigate('/')}
+          >
+            <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-xl">
+              <HomeModernIcon className="w-6 h-6 text-white" />
+            </div>
           </div>
 
-          {/* Search Input - Hidden on small screens */}
-          <div className="hidden sm:block flex-grow">
+          {/* Desktop Search */}
+          <div className="hidden sm:block flex-1">
             <SearchBar />
           </div>
         </div>
 
-        {/* Right Container */}
-        <div className="flex items-center space-x-4 sm:space-x-6">
-          {/* Mobile Search Icon - Shows only on small screens */}
-          <div 
-            className="sm:hidden text-white cursor-pointer"
+        {/* Right Section */}
+        <div className="flex items-center space-x-4 md:space-x-6">
+          {/* Mobile Search Trigger */}
+          <button
+            className="sm:hidden p-2 hover:bg-gray-700/30 rounded-full transition-all duration-300"
             onClick={toggleMobileSearch}
           >
-            <FaSearch className="h-5 w-5" />
-          </div>
+            <MagnifyingGlassIcon className="w-6 h-6 text-gray-400 hover:text-blue-400" />
+          </button>
 
-          {/* Home Link */}
-          <div className="hidden sm:flex items-center bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition cursor-pointer">
-            <FaHome className="mr-2" />
-            <span className="font-medium">Home</span>
-          </div>
+          {/* Home Navigation */}
+          <button
+            className="hidden sm:flex items-center bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 px-4 py-2 rounded-xl transition-all duration-300"
+            onClick={() => navigate('/')}
+          >
+            <HomeIcon className="w-5 h-5 text-white mr-2" />
+            <span className="text-white font-medium">Home</span>
+          </button>
 
-          {/* Notifications Icon */}
-          <div className="relative">
-            <div className="text-gray-200 hover:text-blue-400 transition cursor-pointer p-2">
-              <FaBell className="text-xl sm:text-2xl" />
-              <div className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+          {/* Notifications */}
+          <div className="relative group">
+            <button className="p-2 hover:bg-gray-700/30 rounded-full transition-all duration-300">
+              <BellIcon className="w-6 h-6 text-gray-400 group-hover:text-blue-400" />
+              <div className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow">
                 3
               </div>
-            </div>
+            </button>
           </div>
 
-          {/* Profile Image */}
-          <div className="flex-shrink-0" onClick={()=>navigate('/myprofile')}>
-            <img
-              src={user.profilePic}
-              alt="Profile"
-              className="h-8 w-8 sm:h-10 sm:w-10 object-cover rounded-full cursor-pointer hover:opacity-80 transition border-2 border-transparent hover:border-blue-500"
-            />
+          {/* Profile */}
+          <div 
+            className="relative group cursor-pointer"
+            onClick={() => navigate('/myprofile')}
+          >
+            {user?.profilePic ? (
+              <img
+                src={user.profilePic}
+                alt="Profile"
+                className="h-10 w-10 object-cover rounded-full border-2 border-gray-700 group-hover:border-blue-400 transition-all duration-300"
+              />
+            ) : (
+              <UserCircleIcon className="h-10 w-10 text-gray-400 group-hover:text-blue-400 transition-all duration-300" />
+            )}
           </div>
 
-          {/* Menu */}
-          <div className="hidden sm:hidden text-gray-200 hover:text-blue-400 transition cursor-pointer p-2">
-            <FaGripHorizontal className="text-xl sm:text-2xl" />
-          </div>
+          {/* Menu (Optional) */}
+          <button className="hidden lg:flex p-2 hover:bg-gray-700/30 rounded-xl transition-all duration-300">
+            <Squares2X2Icon className="w-6 h-6 text-gray-400 hover:text-purple-400" />
+          </button>
         </div>
       </div>
     </div>

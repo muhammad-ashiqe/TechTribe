@@ -1,104 +1,99 @@
 import React, { useContext, useEffect, useState } from "react";
-import CreatePostModal from "./CreatePostModal"; // Import the modal component
+import CreatePostModal from "./CreatePostModal";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { SocialContext } from "../context/context";
+import { PhotoIcon, DocumentTextIcon, PlusCircleIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 
 const CreatePost = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const { baseUrl, token } = useContext(SocialContext);
+  const navigate = useNavigate();
 
-  const {baseUrl,token} = useContext(SocialContext)
-  
-    const navigate = useNavigate()
-    
-    useEffect(() => {
-      const fetchUserProfile = async () => {
-        try {
-          if (!token) {
-            console.error("No token found. User must log in.");
-            return;
-          }
-  
-          const config = { headers: { Authorization: `Bearer ${token}` } };
-          const { data } = await axios.get(`${baseUrl}/user/profile`, config);
-          setUser(data);
-        } catch (error) {
-          console.error("Error fetching user profile:", error.response?.data?.message || error.message);
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        if (!token) {
+          console.error("No token found. User must log in.");
+          return;
         }
-      };
-  
-      fetchUserProfile();
-    }, []);
-  
-    if (!user) return <p>Loading...</p>;
-  
-    
-    // Function to handle option clicks
-    const handleOptionClick = () => {
-      setIsModalOpen(true); // Open the modal
+
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        const { data } = await axios.get(`${baseUrl}/user/profile`, config);
+        setUser(data);
+      } catch (error) {
+        console.error("Error fetching user profile:", error.response?.data?.message || error.message);
+      }
     };
-    
-    // console.log(user)
+
+    fetchUserProfile();
+  }, []);
+
+  const handleOptionClick = () => setIsModalOpen(true);
+
+  if (!user) return (
+    <div className="p-4 bg-gray-900/50 rounded-2xl text-center text-gray-400 flex items-center justify-center gap-2">
+      <ArrowPathIcon className="w-5 h-5 animate-spin" />
+      Loading...
+    </div>
+  );
+
   return (
-    <div className="post-content w-full p-4 bg-gray-800 rounded-2xl">
-      <div className="flex items-center gap-3">
+    <div className="w-full p-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl border border-gray-700 ">
+      <div className="flex items-center gap-4">
         {/* Avatar */}
-        <div className="avatar-div">
-          <img
-            className="w-12 h-12 rounded-full object-cover"
-            src={user.profilePic}
-            alt="Profile"
-          />
-        </div>
+        <img
+          className="w-14 h-14 rounded-full object-cover border-2 border-gray-700 hover:border-blue-400 transition-all duration-300 cursor-pointer"
+          src={user.profilePic}
+          alt="Profile"
+          onClick={() => navigate(`/profile/${user._id}`)}
+        />
 
         {/* Input Field */}
-        <div className="input-div flex-1">
-          <input
-            type="text"
-            placeholder="What's happening?"
-            className="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+        <div className="flex-1">
+          <div
+            onClick={handleOptionClick}
+            className="w-full p-4 bg-gray-800/70 text-gray-400 rounded-xl cursor-pointer hover:bg-gray-700/30 transition-all duration-300 border border-gray-700 hover:border-blue-500"
+          >
+            What's on your mind?
+          </div>
         </div>
 
         {/* Post Button */}
         <button
-          className="bg-white p-2 rounded-full hover:bg-blue-600 transition-colors"
-          onClick={handleOptionClick} // Open modal when Post button is clicked
+          onClick={handleOptionClick}
+          className="p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl hover:from-blue-400 hover:to-purple-400 transition-all duration-300"
         >
-          <img
-            className="w-6 h-6"
-            src="https://cdn-icons-png.flaticon.com/512/4926/4926616.png"
-            alt="Post"
-          />
+          <PlusCircleIcon className="w-6 h-6 text-white" />
         </button>
       </div>
 
-      {/* Bottom Div */}
-      <div className="bottom-div flex items-center justify-center px-15 gap-4 mt-4 w-full">
-        {/* Image Option */}
-        <div
-          className="image-div flex-1 flex gap-2 items-center justify-center border border-gray-700 p-2 rounded-lg cursor-pointer hover:bg-gray-800 transition-colors"
-          onClick={handleOptionClick} // Open modal when Image option is clicked
-        >
-          <i className="fa-regular fa-image"></i>
-          <p className="text-sm text-gray-400">Image</p>
-        </div>
+      {/* Options Divider */}
+      <div className="my-4 border-t border-gray-700"></div>
 
-        {/* Thread Option */}
-        <div
-          className="thread-div flex-1 flex gap-2 items-center justify-center border border-gray-700 p-2 rounded-lg cursor-pointer hover:bg-gray-800 transition-colors"
-          onClick={handleOptionClick} // Open modal when Thread option is clicked
+      {/* Bottom Options */}
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <button
+          onClick={handleOptionClick}
+          className="flex items-center gap-3 w-full sm:w-auto px-6 py-3 rounded-xl bg-gray-800/50 hover:bg-gray-700/30 transition-all duration-300 text-gray-400 hover:text-blue-400"
         >
-          <i className="fa-regular fa-file-lines"></i>
-          <p className="text-sm text-gray-400">Thread</p>
-        </div>
+          <PhotoIcon className="w-6 h-6" />
+          <span className="text-sm">Photo/Video</span>
+        </button>
+
+        <button
+          onClick={handleOptionClick}
+          className="flex items-center gap-3 w-full sm:w-auto px-6 py-3 rounded-xl bg-gray-800/50 hover:bg-gray-700/30 transition-all duration-300 text-gray-400 hover:text-purple-400"
+        >
+          <DocumentTextIcon className="w-6 h-6" />
+          <span className="text-sm">Create Thread</span>
+        </button>
       </div>
 
-      {/* Modal */}
       <CreatePostModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)} // Close modal
+        onClose={() => setIsModalOpen(false)}
       />
     </div>
   );

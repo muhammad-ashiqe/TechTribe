@@ -1,17 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import {
-  FiMessageSquare,
-  FiUserPlus,
-  FiUserCheck,
-  FiChevronDown,
-  FiChevronUp,
-  FiChevronsUp,
-  FiChevronsDown,
-} from "react-icons/fi";
 import Post from "../components/Post";
 import { SocialContext } from "../context/context";
+import { UserPlusIcon, UserMinusIcon, ChatBubbleOvalLeftIcon, ChevronUpIcon, ChevronDownIcon, BriefcaseIcon, AcademicCapIcon, MapPinIcon, LinkIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon } from "@heroicons/react/24/solid";
 
 const UserProfile = () => {
   const [profileData, setProfileData] = useState(null);
@@ -120,185 +113,151 @@ const UserProfile = () => {
     return <div className="text-center py-10">User not found</div>;
   }
 
-  console.log(userPosts);
 
   return (
-    <div className="max-w-4xl mx-auto bg-gray-900 min-h-screen text-white">
-      {/* Cover Photo with Profile Image Overlay */}
-      <div className="relative h-48 sm:h-64 w-full bg-gray-800">
-        {/* Cover Photo */}
+    <div className="max-w-4xl mx-auto bg-gradient-to-b from-gray-900 to-gray-800 min-h-screen text-white">
+      {/* Cover Photo Section */}
+      <div className="relative h-48 sm:h-64 group">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20" />
         <img
-          src={
-            profileData.coverPhoto ||
-            "https://images.unsplash.com/photo-1579547945413-497e1b99dac0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
-          }
+          src={profileData.coverPhoto}
           alt="Cover"
           className="w-full h-full object-cover"
+          onError={(e) => e.target.style.display = 'none'}
         />
-
-        {/* Dark overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/70 to-transparent" />
-
-        {/* Profile Picture */}
         <div className="absolute -bottom-16 left-6 sm:left-8 z-10">
-          <div className="relative">
-            <img
-              src={
-                profileData.profilePic ||
-                "https://www.gravatar.com/avatar/?d=mp"
-              }
-              alt="Profile"
-              className="w-32 h-32 sm:w-36 sm:h-36 rounded-full border-4 border-gray-900 object-cover shadow-xl"
-            />
-          </div>
+          <img
+            src={profileData.profilePic}
+            alt="Profile"
+            className="w-32 h-32 sm:w-36 sm:h-36 rounded-full border-2 border-gray-700 object-cover shadow-xl hover:border-blue-400 transition-all duration-300"
+          />
         </div>
       </div>
 
       {/* Profile Content */}
-      <div className="px-6 sm:px-8 pt-20 pb-8">
-        <div className="flex flex-col sm:flex-row">
-          {/* Main Profile Info */}
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold">
+      <div className="px-6 sm:px-8 pt-20 pb-8 space-y-8">
+        {/* Profile Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-6">
+          <div className="space-y-4">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               {profileData.firstName} {profileData.lastName}
             </h1>
-            <p className="text-gray-300 mt-1">{profileData.headline}</p>
-
-            {/* Bio */}
-            {profileData.bio && (
-              <p className="mt-4 text-gray-300">{profileData.bio}</p>
-            )}
-
-            {/* Location and Website */}
-            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-400">
+            <p className="text-lg text-gray-300">{profileData.headline}</p>
+            
+            {/* Location & Website */}
+            <div className="flex flex-wrap gap-4 text-sm text-gray-400">
               {profileData.location && (
-                <span className="flex items-center">
-                  <svg
-                    className="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
+                <div className="flex items-center gap-2">
+                  <MapPinIcon className="w-5 h-5 text-blue-400" />
                   {profileData.location}
-                </span>
+                </div>
               )}
               {profileData.website && (
                 <a
-                  href={`https://${profileData.website}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center text-blue-400 hover:underline"
+                  href={profileData.website}
+                  className="flex items-center gap-2 text-blue-400 hover:text-purple-400 transition-colors"
                 >
-                  <svg
-                    className="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-                    />
-                  </svg>
-                  {profileData.website}
+                  <LinkIcon className="w-5 h-5" />
+                  Portfolio
                 </a>
               )}
             </div>
 
             {/* Stats */}
-            <div className="flex gap-6 mt-6 py-3 border-t border-gray-800">
-              <div className="text-center">
-                <span className="font-bold block">
+            <div className="grid grid-cols-3 gap-4 py-4 border-y border-gray-700">
+              <div className="text-left">
+                <p className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                   {profileData.followers?.length || 0}
-                </span>
-                <span className="text-sm text-gray-400">Followers</span>
+                </p>
+                <p className="text-xs text-gray-400 uppercase tracking-wider">Followers</p>
               </div>
-              <div className="text-center">
-                <span className="font-bold block">
+              <div className="text-left">
+                <p className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                   {profileData.following?.length || 0}
-                </span>
-                <span className="text-sm text-gray-400">Following</span>
+                </p>
+                <p className="text-xs text-gray-400 uppercase tracking-wider">Following</p>
               </div>
-              <div className="text-center">
-                <span className="font-bold block">{userPosts.length || 0}</span>
-                <span className="text-sm text-gray-400">Posts</span>
+              <div className="text-left">
+                <p className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  {userPosts.length || 0}
+                </p>
+                <p className="text-xs text-gray-400 uppercase tracking-wider">Posts</p>
               </div>
             </div>
           </div>
 
-          {/* Action Buttons (right side) */}
+          {/* Action Buttons */}
           {currentUserId !== userId && (
-            <div className="mt-4 sm:mt-0 flex sm:flex-col gap-2">
+            <div className="flex flex-col gap-3 w-full sm:w-auto">
               <button
                 onClick={handleFollow}
-                className={`flex items-center justify-center px-5 py-2.5 text-sm font-medium rounded-md ${
+                className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
                   isFollowing
-                    ? "bg-gray-800 hover:bg-gray-700"
-                    : "bg-blue-600 hover:bg-blue-700"
+                    ? 'bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500'
+                    : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400'
                 }`}
               >
-                {isFollowing ? (
-                  <>
-                    <FiUserCheck className="mr-2" />
-                    Following
-                  </>
-                ) : (
-                  <>
-                    <FiUserPlus className="mr-2" />
-                    Follow
-                  </>
-                )}
+                <div className="flex items-center gap-2">
+                  {isFollowing ? (
+                    <>
+                      <UserMinusIcon className="w-5 h-5" />
+                      Unfollow
+                    </>
+                  ) : (
+                    <>
+                      <UserPlusIcon className="w-5 h-5" />
+                      Follow
+                    </>
+                  )}
+                </div>
               </button>
-              <button className="flex items-center justify-center px-5 py-2.5 text-sm font-medium rounded-md bg-gray-800 hover:bg-gray-700">
-                <FiMessageSquare className="mr-2" />
-                Message
+              <button className="px-6 py-3 rounded-xl bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500 transition-all duration-300">
+                <div className="flex items-center gap-2">
+                  <ChatBubbleOvalLeftIcon className="w-5 h-5" />
+                  Message
+                </div>
               </button>
             </div>
           )}
         </div>
 
-        {/* experience section */}
+        {/* Bio Section */}
+        {profileData.bio && (
+          <div className="p-4 bg-gray-800/50 rounded-2xl border border-gray-700">
+            <p className="text-gray-300 whitespace-pre-line">{profileData.bio}</p>
+          </div>
+        )}
+
+        {/* Experience Section */}
         {profileData.experiences?.length > 0 && (
-          <div className="mt-6">
+          <div className="bg-gray-800/50 rounded-2xl border border-gray-700">
             <button
               onClick={() => setShowExperience(!showExperience)}
-              className="flex items-center justify-between w-full px-4 py-3 bg-gray-800 hover:bg-gray-700 transition-colors rounded-lg"
+              className="flex items-center justify-between w-full px-6 py-4 hover:bg-gray-700/30 transition-all duration-300"
             >
-              <span className="font-semibold">Experience</span>
-              {showExperience ? <FiChevronsUp /> : <FiChevronsDown />}
+              <div className="flex items-center gap-3">
+                <BriefcaseIcon className="w-6 h-6 text-blue-400" />
+                <span className="text-lg font-semibold">Experience</span>
+              </div>
+              {showExperience ? (
+                <ChevronUpIcon className="w-5 h-5" />
+              ) : (
+                <ChevronDownIcon className="w-5 h-5" />
+              )}
             </button>
             {showExperience && (
-              <div className="mt-3 space-y-4">
+              <div className="p-6 pt-0 space-y-4">
                 {profileData.experiences.map((exp) => (
-                  <div key={exp._id} className="p-4 bg-gray-800 rounded-lg">
-                    <div className="flex justify-between">
-                      <div>
+                  <div key={exp._id} className="p-4 bg-gray-900/30 rounded-xl border border-gray-700">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-2">
                         <h3 className="font-semibold text-lg">{exp.title}</h3>
                         <p className="text-blue-400">{exp.company}</p>
-                      </div>
-                      <div className="text-right text-sm text-gray-400">
-                        <p>
-                          {exp.period}
-                        </p>
+                        <p className="text-sm text-gray-400">{exp.period}</p>
                       </div>
                     </div>
                     {exp.description && (
-                      <p className="mt-2 text-gray-300">{exp.description}</p>
+                      <p className="mt-3 text-gray-300 text-sm">{exp.description}</p>
                     )}
                   </div>
                 ))}
@@ -309,20 +268,27 @@ const UserProfile = () => {
 
         {/* Skills Section */}
         {profileData.skills?.length > 0 && (
-          <div className="mt-6">
+          <div className="bg-gray-800/50 rounded-2xl border border-gray-700">
             <button
               onClick={() => setShowSkills(!showSkills)}
-              className="flex items-center justify-between w-full px-4 py-3 bg-gray-800 hover:bg-gray-700 transition-colors rounded-lg"
+              className="flex items-center justify-between w-full px-6 py-4 hover:bg-gray-700/30 transition-all duration-300"
             >
-              <span className="font-semibold">Skills</span>
-              {showSkills ? <FiChevronUp /> : <FiChevronDown />}
+              <div className="flex items-center gap-3">
+                <AcademicCapIcon className="w-6 h-6 text-purple-400" />
+                <span className="text-lg font-semibold">Skills</span>
+              </div>
+              {showSkills ? (
+                <ChevronUpIcon className="w-5 h-5" />
+              ) : (
+                <ChevronDownIcon className="w-5 h-5" />
+              )}
             </button>
             {showSkills && (
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="p-6 pt-0 flex flex-wrap gap-2">
                 {profileData.skills.map((skill, idx) => (
                   <span
                     key={idx}
-                    className="px-3 py-1 bg-gray-800 text-blue-400 rounded-full text-sm"
+                    className="px-3 py-1.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-400 rounded-full text-sm border border-blue-400/30"
                   >
                     {skill}
                   </span>
@@ -333,25 +299,22 @@ const UserProfile = () => {
         )}
 
         {/* Posts Section */}
-        <div className="mt-10">
-          <h2 className="text-xl font-semibold mb-4">Posts</h2>
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            Posts
+          </h2>
           {userPosts.length > 0 ? (
             <div className="space-y-4">
               {userPosts.map((post) => (
-                <div
-                  key={post.id}
-                  className=""
-                >
-                  <Post key={post.id} post={post} />
-                </div>
+                <Post key={post._id} post={post} />
               ))}
             </div>
           ) : (
-            <div className="p-8 text-center bg-gray-800 rounded-xl">
+            <div className="p-6 text-center rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700">
               <p className="text-gray-400">
                 {currentUserId === userId
-                  ? "You haven't posted anything yet."
-                  : `${profileData.firstName} hasn't posted anything yet.`}
+                  ? "You haven't shared anything yet"
+                  : `${profileData.firstName} hasn't shared anything yet`}
               </p>
             </div>
           )}

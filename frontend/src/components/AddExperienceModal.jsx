@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { SocialContext } from "../context/context";
+import { XMarkIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 
 const AddExperienceModal = ({ user, onClose, onExperienceAdded, experienceToEdit }) => {
   const [formData, setFormData] = useState({
@@ -55,15 +56,26 @@ const AddExperienceModal = ({ user, onClose, onExperienceAdded, experienceToEdit
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4 text-white">
-          {experienceToEdit ? "Edit Experience" : "Add Experience"}
-        </h2>
-        <form onSubmit={handleSubmit}>
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 w-full max-w-md shadow-2xl border border-gray-700">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            {experienceToEdit ? "Edit Experience" : "Add Experience"}
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-1.5 hover:bg-gray-700/30 rounded-full transition-all duration-300"
+          >
+            <XMarkIcon className="w-6 h-6 text-gray-300" />
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Title*
               </label>
               <input
@@ -72,11 +84,12 @@ const AddExperienceModal = ({ user, onClose, onExperienceAdded, experienceToEdit
                 value={formData.title}
                 onChange={handleChange}
                 required
-                className="w-full p-2 rounded bg-gray-700 text-white"
+                className="w-full p-3 bg-gray-800/50 text-white rounded-xl border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 transition-all duration-300"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Company*
               </label>
               <input
@@ -85,11 +98,12 @@ const AddExperienceModal = ({ user, onClose, onExperienceAdded, experienceToEdit
                 value={formData.company}
                 onChange={handleChange}
                 required
-                className="w-full p-2 rounded bg-gray-700 text-white"
+                className="w-full p-3 bg-gray-800/50 text-white rounded-xl border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 transition-all duration-300"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Period*
               </label>
               <input
@@ -99,11 +113,12 @@ const AddExperienceModal = ({ user, onClose, onExperienceAdded, experienceToEdit
                 onChange={handleChange}
                 placeholder="e.g. Jan 2020 - Present"
                 required
-                className="w-full p-2 rounded bg-gray-700 text-white"
+                className="w-full p-3 bg-gray-800/50 text-white rounded-xl border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 transition-all duration-300"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Description
               </label>
               <textarea
@@ -111,25 +126,34 @@ const AddExperienceModal = ({ user, onClose, onExperienceAdded, experienceToEdit
                 value={formData.description}
                 onChange={handleChange}
                 rows={3}
-                className="w-full p-2 rounded bg-gray-700 text-white"
+                className="w-full p-3 bg-gray-800/50 text-white rounded-xl border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 resize-none transition-all duration-300"
               />
             </div>
           </div>
-          <div className="flex justify-end mt-6 space-x-3">
+
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-3 mt-6">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded text-white"
+              className="px-5 py-2.5 rounded-xl bg-gray-700 hover:bg-gray-600 text-gray-300 transition-all duration-200 font-medium"
               disabled={loading}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white"
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white font-medium transition-all duration-300 flex items-center gap-2"
               disabled={loading}
             >
-              {loading ? "Saving..." : "Save"}
+              {loading ? (
+                <>
+                  <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
             </button>
           </div>
         </form>

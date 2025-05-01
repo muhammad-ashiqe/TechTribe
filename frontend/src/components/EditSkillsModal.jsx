@@ -2,13 +2,13 @@ import React, { useContext, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { SocialContext } from "../context/context";
+import { XMarkIcon, PlusCircleIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 
 const EditSkillsModal = ({ user, onClose, onSkillsUpdated }) => {
-  // Start with the user's existing skills (or an empty array)
   const [skills, setSkills] = useState(user.skills || []);
   const [newSkill, setNewSkill] = useState("");
   const [loading, setLoading] = useState(false);
-  const {baseUrl,token} = useContext(SocialContext)
+  const { baseUrl, token } = useContext(SocialContext);
 
   // Append a new skill if it's not empty or already added
   const handleAddSkill = () => {
@@ -44,47 +44,67 @@ const EditSkillsModal = ({ user, onClose, onSkillsUpdated }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-gray-800 rounded-lg p-6 w-96">
-        <h2 className="text-xl font-semibold mb-4 text-white">Update Skills</h2>
-        <div className="mb-4">
-          <input
-            type="text"
-            value={newSkill}
-            onChange={(e) => setNewSkill(e.target.value)}
-            placeholder="Enter a skill"
-            className="w-full p-2 mb-2 rounded bg-gray-700 text-white"
-          />
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 w-full max-w-md shadow-2xl border border-gray-700">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            Update Skills
+          </h2>
           <button
-            type="button"
-            onClick={handleAddSkill}
-            className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded text-white"
+            onClick={onClose}
+            className="p-1.5 hover:bg-gray-700/30 rounded-full transition-all duration-300"
           >
-            Add Skill
+            <XMarkIcon className="w-6 h-6 text-gray-300" />
           </button>
         </div>
-        <div className="mb-4">
-          {skills.map((skill, index) => (
-            <span
-              key={index}
-              className="inline-flex items-center bg-blue-600 text-white rounded-full px-3 py-1 mr-2 mb-2"
+
+        {/* Input Section */}
+        <div className="mb-6 space-y-4">
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={newSkill}
+              onChange={(e) => setNewSkill(e.target.value)}
+              placeholder="Enter new skill..."
+              className="flex-1 p-3 bg-gray-800/70 text-white rounded-xl border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 transition-all duration-300"
+            />
+            <button
+              type="button"
+              onClick={handleAddSkill}
+              className="px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 rounded-xl text-white font-medium flex items-center gap-2 transition-all duration-300"
             >
-              {skill}
+              <PlusCircleIcon className="w-5 h-5" />
+              <span>Add</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Skills List */}
+        <div className="mb-6 flex flex-wrap gap-2">
+          {skills.map((skill, index) => (
+            <div
+              key={index}
+              className="inline-flex items-center bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full px-4 py-2 border border-blue-400/30"
+            >
+              <span className="text-blue-400 text-sm">{skill}</span>
               <button
                 type="button"
                 onClick={() => handleRemoveSkill(skill)}
-                className="ml-2 text-red-300 hover:text-red-500"
+                className="ml-2 text-red-400 hover:text-red-300 transition-colors"
               >
-                &times;
+                <XMarkIcon className="w-4 h-4" />
               </button>
-            </span>
+            </div>
           ))}
         </div>
-        <div className="flex justify-end">
+
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="mr-3 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded text-white"
+            className="px-5 py-2.5 rounded-xl bg-gray-700 hover:bg-gray-600 text-gray-300 transition-all duration-200 font-medium"
             disabled={loading}
           >
             Cancel
@@ -92,10 +112,17 @@ const EditSkillsModal = ({ user, onClose, onSkillsUpdated }) => {
           <button
             type="button"
             onClick={handleSubmit}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white"
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white font-medium transition-all duration-300 flex items-center gap-2"
             disabled={loading}
           >
-            {loading ? "Saving..." : "Save"}
+            {loading ? (
+              <>
+                <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              'Save Changes'
+            )}
           </button>
         </div>
       </div>
@@ -104,3 +131,4 @@ const EditSkillsModal = ({ user, onClose, onSkillsUpdated }) => {
 };
 
 export default EditSkillsModal;
+
