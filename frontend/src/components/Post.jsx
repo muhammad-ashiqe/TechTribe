@@ -2,19 +2,44 @@ import React, { useState, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { SocialContext } from "../context/context";
-import { HeartIcon, ChatBubbleOvalLeftIcon, EllipsisHorizontalIcon, BookmarkIcon, FlagIcon, ShareIcon } from "@heroicons/react/24/outline";
-import { HeartIcon as HeartSolidIcon, BookmarkIcon as BookmarkSolidIcon } from "@heroicons/react/24/solid";
+import { 
+  HeartIcon, 
+  ChatBubbleOvalLeftIcon, 
+  EllipsisHorizontalIcon, 
+  BookmarkIcon, 
+  FlagIcon, 
+  ShareIcon 
+} from "@heroicons/react/24/outline";
+import { 
+  HeartIcon as HeartSolidIcon, 
+  BookmarkIcon as BookmarkSolidIcon 
+} from "@heroicons/react/24/solid";
+import { toast } from "react-toastify";
 
 const Post = ({ post }) => {
   const [liked, setLiked] = useState(post.isLied || false);
   const [likeCount, setLikeCount] = useState(post.reactions || 0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [customReason, setCustomReason] = useState("");
+  const [isReporting, setIsReporting] = useState(false);
+  
   const { baseUrl, token } = useContext(SocialContext);
   const navigate = useNavigate();
 
+  const reportReasons = [
+    "Spam",
+    "Inappropriate content",
+    "Harassment or bullying",
+    "False information",
+    "Violence",
+    "Other"
+  ];
+
   const handleCommentClick = () => navigate(`/post/${post.id}`);
-  
+
   const handleLike = async () => {
     try {
       const response = await axios.put(
@@ -29,10 +54,35 @@ const Post = ({ post }) => {
     }
   };
 
-  const handleReport = (reason) => {
-    console.log("Reported post for:", reason);
-    setIsMenuOpen(false);
+  const handleReportSubmit = async () => {
+    if (!reportReason || (reportReason === "Other" && !customReason)) return;
+    
+    try {
+      setIsReporting(true);
+      const finalReason = reportReason === "Other" ? customReason : reportReason;
+      
+      await axios.post(
+        `${baseUrl}/post/post/report`,
+        {
+          postId: post.id,
+          reason: finalReason
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setShowReportModal(false);
+      setReportReason("");
+      setCustomReason("");
+      toast.success("Thank you for your report. We'll review it shortly.");
+    } catch (error) {
+      console.error("Error submitting report:", error);
+      toast.error("Failed to submit report. Please try again later.");
+    } finally {
+      setIsReporting(false);
+    }
   };
+
+  console.log(post)
 
   return (
     <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 mb-4 shadow-2xl border border-gray-700 relative">
@@ -69,7 +119,10 @@ const Post = ({ post }) => {
           {isMenuOpen && (
             <div className="absolute right-0 top-8 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 w-48 z-10">
               <button
-                onClick={() => handleReport('spam')}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  setShowReportModal(true);
+                }}
                 className="w-full px-4 py-3 text-gray-300 hover:bg-gray-700/50 flex items-center gap-2 rounded-t-xl transition-all duration-200"
               >
                 <FlagIcon className="w-5 h-5 text-red-400" />
@@ -140,6 +193,62 @@ const Post = ({ post }) => {
           Share
         </button>
       </div>
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-xl p-6 w-full max-w-md border border-gray-700">
+            <h3 className="text-xl font-bold text-white mb-4">Report Post</h3>
+            
+            <div className="space-y-3 mb-6">
+              {reportReasons.map((reason) => (
+                <button
+                  key={reason}
+                  onClick={() => setReportReason(reason)}
+                  className={`w-full p-3 text-left rounded-lg transition-colors ${
+                    reportReason === reason 
+                      ? "bg-blue-500/20 border border-blue-500"
+                      : "bg-gray-700/50 hover:bg-gray-700"
+                  }`}
+                >
+                  <span className="text-gray-100">{reason}</span>
+                </button>
+              ))}
+            </div>
+
+            {reportReason === "Other" && (
+              <textarea
+                value={customReason}
+                onChange={(e) => setCustomReason(e.target.value)}
+                placeholder="Please specify the reason..."
+                className="w-full p-3 bg-gray-700/50 rounded-lg text-gray-100 placeholder-gray-400 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows="3"
+              />
+            )}
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowReportModal(false);
+                  setReportReason("");
+                  setCustomReason("");
+                }}
+                className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
+                disabled={isReporting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReportSubmit}
+                disabled={!reportReason || (reportReason === "Other" && !customReason) || isReporting}
+                className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {isReporting ? "Submitting..." : "Submit Report"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

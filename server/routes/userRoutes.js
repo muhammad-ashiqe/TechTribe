@@ -8,6 +8,7 @@ import {
   getUserWithId,
   loginUser,
   registerUser,
+  reportUser,
   searchUser,
   unfollowUser,
   updateExperience,
@@ -16,6 +17,7 @@ import {
 } from "../controllers/userController.js";
 import upload from "../middleware/multer.js";
 import authMiddleware from "../middleware/authMiddleware.js";
+
 
 //creting a user router
 const userRouter = express.Router();
@@ -50,4 +52,6 @@ userRouter.delete("/experiences/:id", authMiddleware, deleteExperience);
 
 userRouter.post("/follow/:userId", authMiddleware, followUser);
 userRouter.post("/unfollow/:userId", authMiddleware, unfollowUser);
+
+userRouter.post("/user/report",authMiddleware,reportUser)
 export default userRouter;

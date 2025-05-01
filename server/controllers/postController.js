@@ -1,6 +1,8 @@
 import Post from "../model/postModel.js";
 import cloudinary from "../config/cloudinary.js";
 import jwt from "jsonwebtoken";
+import PostReport from "../model/postReport.js";
+import mongoose from "mongoose";
 
 // Create a post (Text + Optional Image)
 export const createPost = async (req, res) => {
@@ -240,7 +242,7 @@ export const likePost = async (req, res) => {
   }
 };
 
-//coment on post
+//comment on post
 export const commentOnPost = async(req,res)=>{
   try {
     const post = await Post.findById(req.params.postId);
@@ -265,3 +267,37 @@ export const commentOnPost = async(req,res)=>{
     res.status(500).json({ message: error.message });
   }
 }
+
+//report a post
+export const reportPost = async (req, res) => {
+  try {
+    const { postId, reason } = req.body;
+    const reportedBy = req.user.id; // From authentication middleware
+
+    // Validate input
+    if (!postId || !reason) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // Check valid IDs
+    if (!mongoose.Types.ObjectId.isValid(postId)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
+
+    // Create new report
+    const newReport = new PostReport({
+      reportedBy,
+      reportedPost: postId,
+      reason
+    });
+
+    await newReport.save();
+
+    res.status(201).json({
+      message: "Post report submitted successfully",
+      report: newReport
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

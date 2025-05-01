@@ -3,8 +3,20 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import Post from "../components/Post";
 import { SocialContext } from "../context/context";
-import { UserPlusIcon, UserMinusIcon, ChatBubbleOvalLeftIcon, ChevronUpIcon, ChevronDownIcon, BriefcaseIcon, AcademicCapIcon, MapPinIcon, LinkIcon } from "@heroicons/react/24/outline";
+import { 
+  UserPlusIcon, 
+  UserMinusIcon, 
+  ChatBubbleOvalLeftIcon, 
+  ChevronUpIcon, 
+  ChevronDownIcon, 
+  BriefcaseIcon, 
+  AcademicCapIcon, 
+  MapPinIcon, 
+  LinkIcon,
+  FlagIcon // Added FlagIcon import
+} from "@heroicons/react/24/outline";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
+import { toast } from "react-toastify";
 
 const UserProfile = () => {
   const [profileData, setProfileData] = useState(null);
@@ -15,17 +27,30 @@ const UserProfile = () => {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [showSkills, setShowSkills] = useState(false);
   const [showExperience, setShowExperience] = useState(false);
+  
+  // Report related states
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [customReason, setCustomReason] = useState("");
+  const [isReporting, setIsReporting] = useState(false);
+
   const { userId } = useParams();
-  const {baseUrl,token} = useContext(SocialContext)
+  const { baseUrl, token } = useContext(SocialContext);
+
+  const reportReasons = [
+    "Inappropriate content",
+    "Harassment or bullying",
+    "Fake profile",
+    "Spam behavior",
+    "Impersonation",
+    "Other"
+  ];
 
   useEffect(() => {
     const fetchProfileData = async () => {
-      
       try {
-
         if (!token) return;
 
-        // Fetch current user info and profile data in parallel for better performance
         const [currentUserResponse, profileResponse] = await Promise.all([
           axios.get(`${baseUrl}/user/profile`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -38,15 +63,12 @@ const UserProfile = () => {
         setCurrentUserId(currentUserResponse.data._id);
         setProfileData(profileResponse.data);
 
-        // Properly check if current user is in the followers array
-        // Convert both IDs to strings for reliable comparison
         const isUserFollowing = profileResponse.data.followers?.some(
           (followerId) =>
             followerId.toString() === currentUserResponse.data._id.toString()
         );
         setIsFollowing(isUserFollowing);
 
-        // Fetch user posts separately
         const postsResponse = await axios.get(
           `${baseUrl}/post/user/${userId}`,
           { headers: { Authorization: `Bearer ${token}` } }
@@ -60,31 +82,23 @@ const UserProfile = () => {
     };
 
     fetchProfileData();
-  }, [userId]);
+  }, [userId, token, baseUrl]);
 
   const handleFollow = async () => {
     try {
-      if (!token) {
-        // Handle case where user is not logged in
-        return;
-      }
+      if (!token) return;
 
       const config = {
         headers: { Authorization: `Bearer ${token}` },
       };
 
-      // Determine which endpoint to call based on current follow status
       const endpoint = isFollowing
         ? `${baseUrl}/user/unfollow/${userId}`
         : `${baseUrl}/user/follow/${userId}`;
 
-      // Make the API call
       await axios.post(endpoint, {}, config);
-
-      // Update local state immediately for better UX
       setIsFollowing(!isFollowing);
 
-      // Update the followers count in the profile data
       setProfileData((prev) => ({
         ...prev,
         followers: isFollowing
@@ -94,6 +108,34 @@ const UserProfile = () => {
     } catch (err) {
       console.error("Follow error:", err);
       setError(err.response?.data?.message || "Failed to update follow status");
+    }
+  };
+
+  const handleUserReport = async () => {
+    if (!reportReason || (reportReason === "Other" && !customReason)) return;
+    
+    try {
+      setIsReporting(true);
+      const finalReason = reportReason === "Other" ? customReason : reportReason;
+      
+      await axios.post(
+        `${baseUrl}/user/user/report`,
+        {
+          reportedUserId: userId,
+          reason: finalReason
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setShowReportModal(false);
+      setReportReason("");
+      setCustomReason("");
+      toast.success("Report submitted successfully. Thank you!");
+    } catch (error) {
+      console.error("Error submitting report:", error);
+      toast.error("Failed to submit report. Please try again.");
+    } finally {
+      setIsReporting(false);
     }
   };
 
@@ -113,9 +155,64 @@ const UserProfile = () => {
     return <div className="text-center py-10">User not found</div>;
   }
 
-
   return (
     <div className="max-w-4xl mx-auto bg-gradient-to-b from-gray-900 to-gray-800 min-h-screen text-white">
+      {/* Report User Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-xl p-6 w-full max-w-md border border-gray-700">
+            <h3 className="text-xl font-bold text-white mb-4">Report User</h3>
+            
+            <div className="space-y-3 mb-6">
+              {reportReasons.map((reason) => (
+                <button
+                  key={reason}
+                  onClick={() => setReportReason(reason)}
+                  className={`w-full p-3 text-left rounded-lg transition-colors ${
+                    reportReason === reason 
+                      ? "bg-red-500/20 border border-red-500"
+                      : "bg-gray-700/50 hover:bg-gray-700"
+                  }`}
+                >
+                  <span className="text-gray-100">{reason}</span>
+                </button>
+              ))}
+            </div>
+
+            {reportReason === "Other" && (
+              <textarea
+                value={customReason}
+                onChange={(e) => setCustomReason(e.target.value)}
+                placeholder="Please specify the reason..."
+                className="w-full p-3 bg-gray-700/50 rounded-lg text-gray-100 placeholder-gray-400 mb-4 focus:outline-none focus:ring-2 focus:ring-red-500"
+                rows="3"
+              />
+            )}
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowReportModal(false);
+                  setReportReason("");
+                  setCustomReason("");
+                }}
+                className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
+                disabled={isReporting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUserReport}
+                disabled={!reportReason || (reportReason === "Other" && !customReason) || isReporting}
+                className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {isReporting ? "Submitting..." : "Submit Report"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Cover Photo Section */}
       <div className="relative h-48 sm:h-64 group">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20" />
@@ -144,7 +241,6 @@ const UserProfile = () => {
             </h1>
             <p className="text-lg text-gray-300">{profileData.headline}</p>
             
-            {/* Location & Website */}
             <div className="flex flex-wrap gap-4 text-sm text-gray-400">
               {profileData.location && (
                 <div className="flex items-center gap-2">
@@ -163,7 +259,6 @@ const UserProfile = () => {
               )}
             </div>
 
-            {/* Stats */}
             <div className="grid grid-cols-3 gap-4 py-4 border-y border-gray-700">
               <div className="text-left">
                 <p className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
@@ -215,6 +310,16 @@ const UserProfile = () => {
                 <div className="flex items-center gap-2">
                   <ChatBubbleOvalLeftIcon className="w-5 h-5" />
                   Message
+                </div>
+              </button>
+              {/* Report User Button */}
+              <button
+                onClick={() => setShowReportModal(true)}
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-600/20 hover:to-red-700/20 text-red-400 transition-all duration-300"
+              >
+                <div className="flex items-center gap-2">
+                  <FlagIcon className="w-5 h-5" />
+                  Report User
                 </div>
               </button>
             </div>

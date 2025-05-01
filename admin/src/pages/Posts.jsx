@@ -83,39 +83,41 @@ const Posts = () => {
       </div>
     )
   }
-
   return (
     <div className="p-8 bg-gradient-to-br from-gray-900 via-gray-850 to-gray-900 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
+        {/* Enhanced Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-100 mb-2">Post Analytics</h1>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2">
+              Post Analytics
+            </h1>
             <div className="flex items-center gap-4 text-gray-400">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2 bg-gray-800/50 px-3 py-1.5 rounded-lg border border-gray-700">
                 <FileText className="w-5 h-5 text-purple-400" />
                 <span>{posts.length} Total Posts</span>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2 bg-gray-800/50 px-3 py-1.5 rounded-lg border border-gray-700">
                 <Flag className="w-5 h-5 text-red-400" />
-                <span>{posts.filter(p => p.reports && p.reports.length > 0).length} Reported</span>
+                <span>{posts.filter(p => p.reports?.length > 0).length} Reported</span>
               </div>
             </div>
           </div>
           
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-72">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl -z-10" />
             <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
             <input
               type="text"
               placeholder="Search posts..."
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-800 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-900 rounded-xl text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 border border-gray-700"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
             />
           </div>
         </div>
 
-        {/* Posts Grid */}
+        {/* Enhanced Posts Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredPosts.map(post => {
             const user = post.user || {}
@@ -125,16 +127,19 @@ const Posts = () => {
             return (
               <div
                 key={post._id}
-                className="group bg-gray-800/50 hover:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 transition-all duration-300 border border-gray-700/50 hover:border-gray-600 flex flex-col"
+                className="group bg-gradient-to-br from-gray-900 to-gray-800 hover:from-gray-900 hover:to-gray-800/80 rounded-2xl p-6 transition-all duration-300 border border-gray-700 shadow-xl hover:border-blue-500/30 flex flex-col"
               >
                 {/* Post Header */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <img
-                      src={profilePic}
-                      alt={userName}
-                      className="w-10 h-10 rounded-full border-2 border-indigo-500/80 object-cover"
-                    />
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full blur-sm opacity-30 group-hover:opacity-50 transition-opacity" />
+                      <img
+                        src={profilePic}
+                        alt={userName}
+                        className="relative w-10 h-10 rounded-full border-2 border-indigo-500/80 object-cover"
+                      />
+                    </div>
                     <div>
                       <h4 className="text-gray-100 font-medium">{userName}</h4>
                       <span className="text-gray-400 text-xs">{formatDate(post.createdAt)}</span>
@@ -153,13 +158,14 @@ const Posts = () => {
                 {/* Post Image */}
                 {post.image && (
                   <div className="relative w-full mb-4 rounded-xl overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent" />
                     <img
                       src={post.image}
                       alt="post content"
                       className="w-full max-h-64 object-contain bg-gray-700/20"
                     />
                     {post.reports?.length > 0 && (
-                      <div className="absolute top-2 right-2 bg-red-500/20 px-2 py-1 rounded-full text-xs flex items-center gap-1">
+                      <div className="absolute top-2 right-2 bg-red-500/20 backdrop-blur-sm px-2 py-1 rounded-full text-xs flex items-center gap-1 border border-red-400/30">
                         <Flag className="w-4 h-4 text-red-400" />
                         <span className="text-red-400">{post.reports.length}</span>
                       </div>
@@ -167,23 +173,23 @@ const Posts = () => {
                   </div>
                 )}
 
-                {/* Analytics */}
+                {/* Enhanced Analytics */}
                 <div className="grid grid-cols-3 gap-2 text-center mt-auto">
-                  <div className="p-2 bg-gray-700/20 rounded-lg hover:bg-gray-700/30 cursor-pointer">
+                  <div className="p-2 bg-gray-800/50 hover:bg-gray-700/30 rounded-lg border border-gray-700 transition-colors cursor-pointer">
                     <div className="flex items-center justify-center gap-1 text-indigo-400">
                       <Heart className="w-4 h-4" />
                       <span className="font-medium">{post.likes?.length || 0}</span>
                     </div>
                     <span className="text-xs text-gray-400">Likes</span>
                   </div>
-                  <div className="p-2 bg-gray-700/20 rounded-lg hover:bg-gray-700/30 cursor-pointer">
+                  <div className="p-2 bg-gray-800/50 hover:bg-gray-700/30 rounded-lg border border-gray-700 transition-colors cursor-pointer">
                     <div className="flex items-center justify-center gap-1 text-green-400">
                       <MessageCircle className="w-4 h-4" />
                       <span className="font-medium">{post.comments?.length || 0}</span>
                     </div>
                     <span className="text-xs text-gray-400">Comments</span>
                   </div>
-                  <div className="p-2 bg-gray-700/20 rounded-lg hover:bg-gray-700/30 cursor-pointer">
+                  <div className="p-2 bg-gray-800/50 hover:bg-gray-700/30 rounded-lg border border-gray-700 transition-colors cursor-pointer">
                     <div className="flex items-center justify-center gap-1 text-purple-400">
                       <BarChart2 className="w-4 h-4" />
                       <span className="font-medium">{post.shares?.length || 0}</span>
@@ -192,15 +198,15 @@ const Posts = () => {
                   </div>
                 </div>
 
-                {/* Actions */}
+                {/* Enhanced Actions */}
                 <div className="mt-4 flex gap-2">
                   <Link
                     to={`/posts/${post._id}`}
-                    className="flex-1 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 rounded-lg transition-colors text-sm font-medium text-center"
+                    className="flex-1 py-2 bg-indigo-600/30 hover:bg-indigo-600/40 text-indigo-400 rounded-xl transition-all text-sm font-medium text-center border border-indigo-400/30 hover:border-indigo-400/50"
                   >
                     Analyze
                   </Link>
-                  <button className="px-4 py-2 bg-gray-700/50 hover:bg-gray-700/70 text-gray-300 rounded-lg transition-colors text-sm font-medium">
+                  <button className="px-4 py-2 bg-gray-700/50 hover:bg-gray-700/70 text-gray-300 rounded-xl transition-colors text-sm font-medium border border-gray-600/50">
                     Actions
                   </button>
                 </div>
@@ -209,11 +215,11 @@ const Posts = () => {
           })}
         </div>
 
-        {/* Empty State */}
+        {/* Enhanced Empty State */}
         {filteredPosts.length === 0 && (
-          <div className="text-center py-12 text-gray-400">
-            <FileText className="w-12 h-12 mx-auto mb-4" />
-            <p>No posts found matching your criteria</p>
+          <div className="text-center py-12 bg-gray-900/50 rounded-2xl border border-gray-700 shadow-xl">
+            <FileText className="w-12 h-12 mx-auto mb-4 text-gray-600" />
+            <p className="text-gray-400">No posts found matching your criteria</p>
           </div>
         )}
       </div>

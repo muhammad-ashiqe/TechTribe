@@ -8,7 +8,8 @@ import {
   getAllPost, 
   getMyPosts, 
   getSinglePost, 
-  likePost 
+  likePost, 
+  reportPost
 } from "../controllers/postController.js";
 import upload from "../middleware/multer.js";
 
@@ -25,5 +26,6 @@ postRouter.delete("/:id", authMiddleware, deletePost);
 postRouter.put("/:id/like", authMiddleware, likePost);
 postRouter.post("/:postId/comment", authMiddleware, commentOnPost);
 postRouter.get("/user/:userId",fetchUserPost)
+postRouter.post('/post/report',authMiddleware,reportPost);
 
 export default postRouter;

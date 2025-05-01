@@ -30,9 +30,10 @@ app.use('/api/post',postRouter)
 app.use('/api/admin',adminRouter)
 
 //db connection
-await ConnectDB();
+ConnectDB();
 
 //starting server
 app.listen(PORT, () => {
   console.log(`Server Started http://localhost:${PORT}`);
 });
+

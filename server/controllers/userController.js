@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import cloudinary from "../config/cloudinary.js";
 import mongoose from "mongoose";
 import Post from "../model/postModel.js";
+import UserReport from "../model/userReport.js";
 
 // User registration
 const registerUser = async (req, res) => {
@@ -503,6 +504,41 @@ const unfollowUser = async (req, res) => {
   }
 }
 
+const reportUser = async (req, res) => {
+  try {
+    const { reportedUserId, reason } = req.body;
+    const reportedBy = req.user.id; // Assuming you have authentication middleware
+
+    // Validate input
+    if (!reportedUserId || !reason) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // Check valid IDs
+    if (!mongoose.Types.ObjectId.isValid(reportedUserId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    // Create new report
+    const newReport = new UserReport({
+      reportedBy,
+      reportedUser: reportedUserId,
+      reason
+    });
+
+    await newReport.save();
+
+    res.status(201).json({
+      message: "User report submitted successfully",
+      report: newReport
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
 export {
   registerUser,
   loginUser,
@@ -516,5 +552,6 @@ export {
   updateExperience,
   deleteExperience,
   followUser,
-  unfollowUser
+  unfollowUser,
+  reportUser
 };
