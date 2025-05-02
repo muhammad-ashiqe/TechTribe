@@ -387,3 +387,53 @@ export const updateReportStatus =  async (req, res) => {
     })
   }
 }
+
+//delete post 
+export const deletePost = async (req, res) => {
+  try {
+    const { postId } = req.params
+
+    // Find post with validation
+    const post = await Post.findById(postId)
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: 'Post not found'
+      })
+    }
+
+    // Delete associated image from Cloudinary if exists
+    if (post.image) {
+      const publicId = post.image.split('/').pop().split('.')[0]
+      await cloudinary.uploader.destroy(`posts/${publicId}`)
+    }
+
+    // Delete post and associated data in transaction
+    await Promise.all([
+      Post.findByIdAndDelete(postId),
+      PostReport.deleteMany({ reportedPost: postId }),
+      // Remove post from users' likedPosts arrays
+      User.updateMany(
+        { _id: { $in: post.likes } },
+        { $pull: { likedPosts: postId } }
+      ),
+      // Remove post from users' sharedPosts arrays
+      User.updateMany(
+        { _id: { $in: post.shares } },
+        { $pull: { sharedPosts: postId } }
+      )
+    ])
+
+    res.status(200).json({
+      success: true,
+      message: 'Post and all associated data deleted successfully'
+    })
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete post',
+      error: error.message
+    })
+  }
+}

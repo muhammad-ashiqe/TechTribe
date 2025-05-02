@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import axios from 'axios'
 import {
   FileText,
   Search,
@@ -33,9 +34,17 @@ const Posts = () => {
       }
     }
     fetchPosts()
-  }, [])
+  }, [posts])
 
-  console.log(posts)
+ 
+  const deletePost=async(postId)=>{
+    try {
+      const res = await axios.delete(`http://localhost:7000/api/admin/posts/${postId}`);
+      console.log(res)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   const filteredPosts = posts.filter(post =>
     post?.description?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -208,8 +217,12 @@ const Posts = () => {
                   >
                     Analyze
                   </Link>
-                  <button className="px-4 py-2 bg-gray-700/50 hover:bg-gray-700/70 text-gray-300 rounded-xl transition-colors text-sm font-medium border border-gray-600/50">
-                    Actions
+                  <button 
+                  
+                  onClick={()=>deletePost(post._id)}
+                  
+                  className="px-4 py-2 bg-red-700/50 hover:bg-red-700/70 text-gray-300 rounded-xl transition-colors text-sm font-medium border border-red-600/50">
+                    Delete
                   </button>
                 </div>
               </div>

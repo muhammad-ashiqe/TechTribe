@@ -11,7 +11,16 @@ import UserProfile from "./pages/UserProfile";
 function App() {
   return (
     <>
-      <ToastContainer />
+      <ToastContainer  position="top-right"
+        autoClose={1000}
+        hideProgressBar={true}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="blue"/>
       <Routes>
         <Route path="/landing" element={<LandingPage />} />
         <Route path="/auth" element={<Auth />} />
