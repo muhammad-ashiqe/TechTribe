@@ -1,51 +1,62 @@
+import React, { createContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { createContext, useEffect, useState } from "react";
 
-// 1. Create the context
-const SocialContext = createContext();
+export const SocialContext = createContext();
 
-// 2. Create the provider component
-const SocialContextProvider = ({ children }) => {
-  const [user, setUser] = useState([]);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+export const SocialContextProvider = ({ children }) => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(() =>
+    localStorage.getItem("token")
+  );
   const baseUrl = "http://localhost:7000/api";
-  
-  const fetchLoggedUserProfile = async () => {
-    try {
-      if (!token) {
-        console.error("No token found. User must log in.");
-        navigate("/login");
-        return;
-      }
 
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      const { data } = await axios.get(`${baseUrl}/user/profile`, config);
-      setUser(data);
-    } catch (error) {
-      console.error(
-        "Error fetching user profile:",
-        error.response?.data?.message || error.message
-      );
-      if (error.response?.status === 401) {
-        localStorage.removeItem("token");
-        navigate("/login");
-      }
+  // Sync localStorage → state once on mount
+  useEffect(() => {
+    const stored = localStorage.getItem("token");
+    if (stored && stored !== token) {
+      setToken(stored);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  fetchLoggedUserProfile();
+  // Whenever token changes: either fetch profile or redirect to /auth
+  useEffect(() => {
+    if (!token) {
+      navigate("/auth", { replace: true });
+      return;
+    }
+
+    const fetchProfile = async () => {
+      try {
+        const { data } = await axios.get(
+          `${baseUrl}/user/profile`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setUser(data);
+      } catch (err) {
+        console.error("Profile fetch error:", err);
+        if (err.response?.status === 401) {
+          localStorage.removeItem("token");
+          setToken(null);
+        }
+      }
+    };
+
+    fetchProfile();
+  }, [token, navigate]);
+
   const value = {
-    // your context values go here
     user,
+    token,
+    setToken,
     baseUrl,
-    token
   };
 
   return (
-    <SocialContext.Provider value={value}>{children}</SocialContext.Provider>
+    <SocialContext.Provider value={value}>
+      {children}
+    </SocialContext.Provider>
   );
 };
-
-// 3. Export both the provider and the context
-export { SocialContextProvider, SocialContext};
-

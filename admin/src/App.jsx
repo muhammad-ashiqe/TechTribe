@@ -4,6 +4,7 @@ import  Navbar  from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
 import Posts from "./pages/Posts";
+import Reports from "./pages/Reports";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/users" element={<Users />} />
               <Route path="/posts" element={<Posts />} />
+              <Route path="/reports" element={<Reports />} />
             </Routes>
           </main>
         </div>

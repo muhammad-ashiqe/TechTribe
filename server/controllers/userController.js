@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import cloudinary from "../config/cloudinary.js";
 import mongoose from "mongoose";
 import Post from "../model/postModel.js";
-import UserReport from "../model/userReport.js";
+import {UserReport} from "../model/userReport.js";
 
 // User registration
 const registerUser = async (req, res) => {

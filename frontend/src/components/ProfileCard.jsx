@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { SocialContext } from "../context/context";
-import { UserCircleIcon, PencilIcon, UsersIcon, BookmarkIcon } from "@heroicons/react/24/outline";
+import { UserCircleIcon, PencilIcon, UsersIcon, BookmarkIcon,XMarkIcon } from "@heroicons/react/24/outline";
 
 const ProfileCard = () => {
   const { user } = useContext(SocialContext);

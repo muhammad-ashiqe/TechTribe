@@ -1,5 +1,7 @@
 import Post from "../model/postModel.js";
+import { PostReport } from "../model/postReport.js";
 import User from "../model/userModel.js";
+import { UserReport } from "../model/userReport.js";
 
 //status section 
 export const totalSummary = async (req, res) => {
@@ -13,8 +15,11 @@ export const totalSummary = async (req, res) => {
       { $unwind: "$comments" },
       { $count: "totalComments" }
     ]);
-    const reportedItems = await Post.countDocuments({ "reports": { $gte: 1 } });
-    
+     // Get total reported posts and users
+     const reportedPosts = await PostReport.countDocuments();
+     const reportedUsers = await UserReport.countDocuments();
+     const totalReports = reportedPosts + reportedUsers;
+ 
     // Get the latest 5 signups (by createdAt in descending order)
     const latestSignups = await User.find().sort({ createdAt: -1 }).limit(5);
     const newSignupsToday = latestSignups.length;  // Just the count of the latest 5 users
@@ -47,8 +52,8 @@ export const totalSummary = async (req, res) => {
           color: "warning",
         },
         {
-          title: "Reported Items",
-          value: reportedItems,
+          title: "Reported Content",
+          value: totalReports,
           icon: "alert-circle",
           color: "danger",
         },
@@ -121,28 +126,73 @@ export const postPerDay = async(req,res)=>{
 
 export const reportPerDay = async (req,res)=>{
   try {
-    const reportsPerDay = await Post.aggregate([
-      { $match: { "reports": { $gte: 1 } } },
+    // Get post reports per day
+    const postReports = await PostReport.aggregate([
       {
-        $project: {
-          date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }
+        $group: {
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+          },
+          postReports: { $sum: 1 }
         }
       },
-      { $group: { _id: "$date", reports: { $sum: 1 } } },
       { $sort: { _id: 1 } }
     ]);
 
-    // Format the response for the chart
-    const formattedReportsData = reportsPerDay.map(item => ({
-      date: item._id,
-      reports: item.reports,
-    }));
+    // Get user reports per day
+    const userReports = await UserReport.aggregate([
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+          },
+          userReports: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
 
-    res.json({
-      chartData: formattedReportsData
+    // Combine data into single timeline
+    const reportMap = new Map();
+
+    // Process post reports
+    postReports.forEach(({ _id, postReports }) => {
+      reportMap.set(_id, {
+        date: _id,
+        postReports,
+        userReports: 0
+      });
     });
+
+    // Process user reports
+    userReports.forEach(({ _id, userReports }) => {
+      if (reportMap.has(_id)) {
+        reportMap.get(_id).userReports = userReports;
+      } else {
+        reportMap.set(_id, {
+          date: _id,
+          postReports: 0,
+          userReports
+        });
+      }
+    });
+
+    // Convert to sorted array
+    const combinedData = Array.from(reportMap.values()).sort((a, b) => 
+      new Date(a.date) - new Date(b.date)
+    );
+
+    res.status(200).json({
+      success: true,
+      data: combinedData
+    });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch report analytics",
+      error: error.message
+    });
   }
 }
 
@@ -205,22 +255,22 @@ export const fetchAllPosts = async (req, res) => {
       // populate the author of the post
       .populate({
         path: 'user',
-        select: 'username email profilePicture'  // adjust fields as needed
+        select: 'firstName lastName email profilePic'  // adjust fields as needed
       })
       // populate users who liked the post
       .populate({
         path: 'likes',
-        select: 'username profilePicture'
+        select: 'firstName lastName profilePic'
       })
       // populate each comment's user
       .populate({
         path: 'comments.user',
-        select: 'username profilePicture'
+        select: 'firstName lastName profilePic'
       })
       // populate users who shared the post
       .populate({
         path: 'shares',
-        select: 'username profilePicture'
+        select: 'firstName lastName profilePic'
       })
       // most recent posts first
       .sort({ createdAt: -1 });
@@ -234,3 +284,106 @@ export const fetchAllPosts = async (req, res) => {
 };
 
 
+
+// Get all post reports with populated data
+export const getPostReports = async (req, res) => {
+  try {
+    const postReports = await PostReport.find()
+      .populate({
+        path: 'reportedBy',
+        select: 'firstName lastName email profilePic'
+      })
+      .populate({
+        path: 'reportedPost',
+        select: 'description image createdAt',
+        populate: {
+          path: 'user',
+          select: 'firstName lastName profilePic'
+        }
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.status(200).json({
+      success: true,
+      data: postReports.map(report => ({
+        ...report,
+        type: 'post'
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch post reports",
+      error: error.message
+    });
+  }
+};
+
+// Get all user reports with populated data
+export const getUserReports = async (req, res) => {
+  try {
+    const userReports = await UserReport.find()
+      .populate({
+        path: 'reportedBy',
+        select: 'firstName lastName email profilePic'
+      })
+      .populate({
+        path: 'reportedUser',
+        select: 'firstName lastName email profilePic headline location'
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.status(200).json({
+      success: true,
+      data: userReports.map(report => ({
+        ...report,
+        type: 'user'
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch user reports",
+      error: error.message
+    });
+  }
+};
+
+
+// Update report status
+export const updateReportStatus =  async (req, res) => {
+  try {
+    const { reportId } = req.params
+    const { newStatus, reportType } = req.body
+
+    const validStatuses = ['pending', 'reviewed', 'resolved']
+    if (!validStatuses.includes(newStatus)) {
+      return res.status(400).json({ message: 'Invalid status' })
+    }
+
+    const Model = reportType === 'post' ? PostReport : UserReport
+    const updatedReport = await Model.findByIdAndUpdate(
+      reportId,
+      { status: newStatus },
+      { new: true }
+    )
+
+    if (!updatedReport) {
+      return res.status(404).json({ message: 'Report not found' })
+    }
+
+    res.json({
+      success: true,
+      data: updatedReport
+    })
+    
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error updating report status',
+      error: error.message
+    })
+  }
+}

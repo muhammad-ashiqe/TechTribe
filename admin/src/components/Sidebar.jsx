@@ -11,6 +11,7 @@ const links = [
   { name: 'Dashboard', path: '/dashboard', icon: <HomeIcon className="w-6 h-6" /> },
   { name: 'Users', path: '/users', icon: <UserGroupIcon className="w-6 h-6" /> },
   { name: 'Posts', path: '/posts', icon: <DocumentTextIcon className="w-6 h-6" /> },
+  { name: 'Reports', path: '/reports', icon: <DocumentTextIcon className="w-6 h-6" /> }
 ];
 
 export const Sidebar = () => {

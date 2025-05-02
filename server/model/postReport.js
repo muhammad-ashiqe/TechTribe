@@ -25,5 +25,4 @@ const PostReportSchema = new mongoose.Schema({
   timestamps: true 
 });
 
-const PostReport = mongoose.model("PostReport", PostReportSchema);
-export default PostReport;
+export const PostReport = mongoose.model("PostReport", PostReportSchema);

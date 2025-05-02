@@ -7,9 +7,9 @@ import { SocialContextProvider } from "./context/context";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <SocialContextProvider>
-    <BrowserRouter>
+  <BrowserRouter>
+    <SocialContextProvider>
       <App />
-    </BrowserRouter>
-  </SocialContextProvider>
+    </SocialContextProvider>
+  </BrowserRouter>
 );

@@ -39,10 +39,10 @@ const Navbar = ({ onMenuToggle }) => {
           </span>
           <div className="w-8 h-8 rounded-full border-2 border-gray-600 group-hover:border-blue-400 transition-all duration-300 overflow-hidden">
             <img 
-              src="/path-to-admin-avatar.png" 
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBhjoZmqCRAQ5zUbhsMXksI0DgZnK-ThRSSuQgBVJKHP9VjkE6v2BturFKr_oprzUD1XM&usqp=CAU" 
               alt="Admin avatar"
               className="w-full h-full object-cover"
-              onError={(e) => e.target.src = '/default-avatar.png'}
+              
             />
           </div>
         </div>

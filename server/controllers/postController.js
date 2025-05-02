@@ -1,7 +1,7 @@
 import Post from "../model/postModel.js";
 import cloudinary from "../config/cloudinary.js";
 import jwt from "jsonwebtoken";
-import PostReport from "../model/postReport.js";
+import {PostReport} from "../model/postReport.js";
 import mongoose from "mongoose";
 
 // Create a post (Text + Optional Image)

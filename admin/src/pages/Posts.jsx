@@ -35,6 +35,8 @@ const Posts = () => {
     fetchPosts()
   }, [])
 
+  console.log(posts)
+
   const filteredPosts = posts.filter(post =>
     post?.description?.toLowerCase().includes(searchQuery.toLowerCase())
   )

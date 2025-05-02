@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import { loginUser, registerUser } from "../services/authServices";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
+import { useContext } from "react";
+import { SocialContext } from "../context/context";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const {setToken} = useContext(SocialContext)
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -44,14 +48,18 @@ const Auth = () => {
     try {
       if (isLogin) {
         // Login user
-        await loginUser({ email: formData.email, password: formData.password });
+       const response = await loginUser({ email: formData.email, password: formData.password });
+       setToken(response.token);
         toast.success("Login successful! Welcome back."); // Success toast
       } else {
         // Register user
-        await registerUser(formData);
+        const response = await registerUser(formData);
+        setToken(response.token);
         toast.success("Registration successful! Welcome to our platform."); // Success toast
       }
-      navigate("/"); // Redirect to home
+     
+      // 2) navigate to home
+      navigate("/", { replace: true });
     } catch (err) {
       // Display error toast
       console.log(err);

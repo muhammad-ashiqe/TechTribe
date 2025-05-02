@@ -31,5 +31,4 @@ const UserReportSchema = new mongoose.Schema({
   }
 });
 
-const UserReport = mongoose.model("UserReport", UserReportSchema);
-export default UserReport;
+export const UserReport = mongoose.model("UserReport", UserReportSchema);

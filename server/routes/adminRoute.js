@@ -1,5 +1,5 @@
 import express from "express"
-import { fetchAllPosts, fetchAllUsers, latestPost, latestSignup, postPerDay, reportPerDay, totalSummary, userGrowth } from "../controllers/adminController.js";
+import { fetchAllPosts, fetchAllUsers, getPostReports, getUserReports, latestPost, latestSignup, postPerDay, reportPerDay, totalSummary, updateReportStatus, userGrowth } from "../controllers/adminController.js";
 
 const adminRouter = express.Router();
 
@@ -19,5 +19,10 @@ adminRouter.get('/dashboard/latest-post',latestPost);
 //fetch allUsers
 adminRouter.get('/fetch-all-users',fetchAllUsers)
 adminRouter.get('/fetch-all-posts',fetchAllPosts)
+
+
+adminRouter.get("/reports/posts", getPostReports);
+adminRouter.get("/reports/users", getUserReports);
+adminRouter.patch('/reports/:reportId/status',updateReportStatus)
 
 export {adminRouter}
