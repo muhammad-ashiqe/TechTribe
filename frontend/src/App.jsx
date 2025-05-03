@@ -20,7 +20,7 @@ function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="blue"/>
+        theme="dark"/>
       <Routes>
         <Route path="/landing" element={<LandingPage />} />
         <Route path="/auth" element={<Auth />} />

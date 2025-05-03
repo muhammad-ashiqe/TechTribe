@@ -13,7 +13,6 @@ const ExperienceSchema = new mongoose.Schema({
   description: { type: String, default: "", trim: true },
 });
 
-
 const UserSchema = new mongoose.Schema(
   {
     firstName: { type: String, required: true, trim: true },
@@ -32,12 +31,13 @@ const UserSchema = new mongoose.Schema(
     password: { type: String, required: true, minlength: 6 },
     profilePic: {
       type: String,
-      default: "https://res.cloudinary.com/default-profile-pic.jpg",
+      default: "https://www.shutterstock.com/image-vector/avatar-gender-neutral-silhouette-vector-600nw-2470054311.jpg",
       trim: true,
     },
     coverPhoto: {
       type: String,
-      default: "https://i.pinimg.com/736x/a7/d2/45/a7d24524d2d02bc104ec0c0aff36dcf6.jpg",
+      default:
+        "https://www.newforma.com/wp-content/themes/newforma/assets/images/lazyload-fallback.png",
       trim: true,
     },
     headline: { type: String, default: "", trim: true },
@@ -51,6 +51,10 @@ const UserSchema = new mongoose.Schema(
     posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    isBanned: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true, minimize: false }
 );

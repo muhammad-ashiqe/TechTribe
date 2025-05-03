@@ -54,7 +54,7 @@ export const getAllPost = async (req, res) => {
 
     // Fetch posts with user details
     const posts = await Post.find()
-      .populate("user", "firstName lastName jobTitle profilePic")
+      .populate("user", "_id firstName lastName headline profilePic")
       .sort({ createdAt: -1 })
       .lean(); // Convert to plain JS objects
 
@@ -64,7 +64,8 @@ export const getAllPost = async (req, res) => {
       username: `${post.user?.firstName || "Unknown"} ${
         post.user?.lastName || ""
       }`.trim(),
-      jobTitle: post.user?.jobTitle || "No Job Title",
+      userId:post.user._id,
+      headline: post.user?.headline || "No Job Title",
       profilePic:
         post.user?.profilePic ||
         "https://res.cloudinary.com/default-profile-pic.jpg",

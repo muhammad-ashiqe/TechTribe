@@ -1,5 +1,5 @@
 import express from "express"
-import { deletePost, fetchAllPosts, fetchAllUsers, getPostReports, getUserReports, latestPost, latestSignup, postPerDay, reportPerDay, totalSummary, updateReportStatus, userGrowth } from "../controllers/adminController.js";
+import { banUser, deletePost, fetchAllPosts, fetchAllUsers, getPostReports, getUserReports, latestPost, latestSignup, postPerDay, reportPerDay, totalSummary, updateReportStatus, userGrowth } from "../controllers/adminController.js";
 
 const adminRouter = express.Router();
 
@@ -25,6 +25,9 @@ adminRouter.get("/reports/posts", getPostReports);
 adminRouter.get("/reports/users", getUserReports);
 adminRouter.patch('/reports/:reportId/status',updateReportStatus)
 
-adminRouter.delete('/posts/:postId',deletePost)
+adminRouter.delete('/posts/:postId',deletePost);
+
+//ban user
+adminRouter.put('/ban-user/:userId',banUser)
 
 export {adminRouter}

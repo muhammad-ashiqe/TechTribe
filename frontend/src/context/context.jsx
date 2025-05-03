@@ -12,16 +12,15 @@ export const SocialContextProvider = ({ children }) => {
   );
   const baseUrl = "http://localhost:7000/api";
 
-  // Sync localStorage → state once on mount
   useEffect(() => {
     const stored = localStorage.getItem("token");
     if (stored && stored !== token) {
       setToken(stored);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, []);
 
-  // Whenever token changes: either fetch profile or redirect to /auth
+ 
   useEffect(() => {
     if (!token) {
       navigate("/auth", { replace: true });

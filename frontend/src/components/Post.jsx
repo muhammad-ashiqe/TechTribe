@@ -82,7 +82,7 @@ const Post = ({ post }) => {
     }
   };
 
-  console.log(post)
+console.log(post)
 
   return (
     <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 mb-4 shadow-2xl border border-gray-700 relative">
@@ -101,7 +101,7 @@ const Post = ({ post }) => {
           >
             {post.username}
           </h3>
-          <p className="text-sm text-gray-400">{post.jobTitle}</p>
+          <p className="text-sm text-gray-400">{post.headline}</p>
           <p className="text-xs text-gray-500 mt-1">
             {new Date(post.timeAgo).toLocaleDateString('en-US', {
               month: 'short',

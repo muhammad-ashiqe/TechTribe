@@ -11,12 +11,9 @@ import { SocialContext } from "../context/context";
 import {
   UserCircleIcon,
   BriefcaseIcon,
-  AcademicCapIcon,
   PlusIcon,
   PencilIcon,
-  UserGroupIcon,
-  LinkIcon,
-  DocumentTextIcon,
+  ArrowLeftOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
 
@@ -29,8 +26,13 @@ const MyProfile = () => {
   const [isSkillsModalOpen, setIsSkillsModalOpen] = useState(false);
   const navigate = useNavigate();
   const { baseUrl, token } = useContext(SocialContext);
-
   const [isExperienceModalOpen, setIsExperienceModalOpen] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/auth");
+    toast.success("Logged out successfully");
+  };
 
   const handleExperienceAdded = (newExperiences) => {
     setUser((prev) => ({ ...prev, experiences: newExperiences }));
@@ -43,7 +45,6 @@ const MyProfile = () => {
         experiences: prev.experiences.filter((exp) => exp._id !== deletedExpId),
       }));
     } else {
-      // Trigger refresh when experience is added/updated
       fetchUserProfile();
     }
   };
@@ -62,7 +63,6 @@ const MyProfile = () => {
         throw new Error("Failed to delete post");
       }
 
-      // Remove the post from state
       setRecentPosts((prevPosts) =>
         prevPosts.filter((post) => post._id !== postId)
       );
@@ -73,22 +73,23 @@ const MyProfile = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        if (!token) {
-          navigate("/auth");
-          return;
-        }
-        const config = { headers: { Authorization: `Bearer ${token}` } };
-        const { data } = await axios.get(`${baseUrl}/user/profile`, config);
-        setUser(data);
-      } catch (err) {
-        setError(err.response?.data?.message || err.message);
-      } finally {
-        setLoading(false);
+  const fetchUserProfile = async () => {
+    try {
+      if (!token) {
+        navigate("/auth");
+        return;
       }
-    };
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const { data } = await axios.get(`${baseUrl}/user/profile`, config);
+      setUser(data);
+    } catch (err) {
+      setError(err.response?.data?.message || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchUserProfile();
   }, [navigate]);
 
@@ -103,8 +104,7 @@ const MyProfile = () => {
           },
         });
 
-        setRecentPosts(data); // Store posts in state
-        console.log("User posts fetched:", data);
+        setRecentPosts(data);
       } catch (err) {
         console.error(
           "Failed to fetch user posts:",
@@ -114,7 +114,8 @@ const MyProfile = () => {
     };
 
     fetchUserPosts();
-  }, []); // Runs once on component mount
+  }, []);
+
   if (loading)
     return (
       <div className="flex justify-center items-center h-screen bg-gray-900">
@@ -138,7 +139,6 @@ const MyProfile = () => {
 
   return (
     <div className="max-w-4xl mx-auto bg-gradient-to-b from-gray-900 to-gray-800 min-h-screen text-white overflow-hidden">
-      {/* Cover Photo */}
       <div className="relative h-48 sm:h-64 group">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20" />
         {user.coverPhoto && (
@@ -163,7 +163,6 @@ const MyProfile = () => {
       </div>
 
       <div className="px-4 sm:px-8 pt-16 sm:pt-24 pb-8 space-y-8">
-        {/* Profile Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
           <div className="space-y-2">
             <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
@@ -194,12 +193,17 @@ const MyProfile = () => {
               <PencilIcon className="w-4 h-4" />
               Edit Profile
             </button>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-400 hover:to-orange-400 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2"
+            >
+              <ArrowLeftOnRectangleIcon className="w-4 h-4" />
+              Logout
+            </button>
           </div>
         </div>
 
-        {/* Stats */}
         <div className="flex justify-between items-center py-4 border-y border-gray-700">
-          {/* Followers */}
           <div className="flex-1 text-left pr-4 border-r border-gray-700">
             <p className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               {user.followersCount || 0}
@@ -208,8 +212,6 @@ const MyProfile = () => {
               FOLLOWERS
             </p>
           </div>
-
-          {/* Following */}
           <div className="flex-1 text-left px-4 border-r border-gray-700">
             <p className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               {user.followingCount || 0}
@@ -218,8 +220,6 @@ const MyProfile = () => {
               FOLLOWING
             </p>
           </div>
-
-          {/* Posts */}
           <div className="flex-1 text-left pl-4">
             <p className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               {recentPosts?.length || 0}
@@ -227,14 +227,13 @@ const MyProfile = () => {
             <p className="text-xs text-gray-400 mt-1 tracking-wider">POSTS</p>
           </div>
         </div>
-        {/* Bio Section */}
+
         <div className="p-4 bg-gray-800/50 rounded-2xl border border-gray-700">
           <p className="text-gray-300 whitespace-pre-line">
             {user.bio || "No bio added yet"}
           </p>
         </div>
 
-        {/* Skills Section */}
         <div className="bg-gray-800/50 rounded-2xl border border-gray-700 p-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
@@ -264,7 +263,6 @@ const MyProfile = () => {
           </div>
         </div>
 
-        {/* Experience Section */}
         <div className="bg-gray-800/50 rounded-2xl border border-gray-700 p-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
@@ -285,7 +283,6 @@ const MyProfile = () => {
           />
         </div>
 
-        {/* Recent Activity */}
         <div className="bg-gray-800/50 rounded-2xl border border-gray-700 p-4">
           <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
             Recent Activity
@@ -308,7 +305,6 @@ const MyProfile = () => {
         </div>
       </div>
 
-      {/* Modals */}
       {isProfileModalOpen && (
         <EditProfileModal
           user={user}

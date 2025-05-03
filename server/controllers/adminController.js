@@ -2,6 +2,7 @@ import Post from "../model/postModel.js";
 import { PostReport } from "../model/postReport.js";
 import User from "../model/userModel.js";
 import { UserReport } from "../model/userReport.js";
+import cloudinary from "../config/cloudinary.js";
 
 //status section 
 export const totalSummary = async (req, res) => {
@@ -437,3 +438,31 @@ export const deletePost = async (req, res) => {
     })
   }
 }
+
+// ban user
+export const banUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.isBanned = !user.isBanned;
+    await user.save();
+
+    res.status(200).json({
+      message: `User ${user.isBanned ? 'banned' : 'unbanned'} successfully`,
+      user: {
+        _id: user._id,
+        isBanned: user.isBanned,
+        firstName: user.firstName,
+        lastName: user.lastName
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error updating user ban status',
+      error: error.message
+    });
+  }
+};

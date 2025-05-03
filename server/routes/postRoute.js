@@ -12,20 +12,21 @@ import {
   reportPost
 } from "../controllers/postController.js";
 import upload from "../middleware/multer.js";
+import { checkBannedStatus } from "../middleware/banMiddleware.js";
 
 const postRouter = express.Router();
 
 // Correct order - specific routes FIRST
 postRouter.get('/getAllPost', getAllPost); // Feed posts route
-postRouter.get('/my-posts', authMiddleware, getMyPosts); // User's personal posts
-postRouter.get('/:postId', getSinglePost); // Generic ID route LAST
+postRouter.get('/my-posts', authMiddleware,checkBannedStatus, getMyPosts); 
+postRouter.get('/:postId', getSinglePost); 
 
 // Other routes...
-postRouter.post("/create", authMiddleware, upload.single("image"), createPost);
-postRouter.delete("/:id", authMiddleware, deletePost);
-postRouter.put("/:id/like", authMiddleware, likePost);
-postRouter.post("/:postId/comment", authMiddleware, commentOnPost);
+postRouter.post("/create", authMiddleware,checkBannedStatus, upload.single("image"), createPost);
+postRouter.delete("/:id", authMiddleware,checkBannedStatus, deletePost);
+postRouter.put("/:id/like", authMiddleware,checkBannedStatus, likePost);
+postRouter.post("/:postId/comment", authMiddleware,checkBannedStatus, commentOnPost);
 postRouter.get("/user/:userId",fetchUserPost)
-postRouter.post('/post/report',authMiddleware,reportPost);
+postRouter.post('/post/report',authMiddleware,checkBannedStatus,reportPost);
 
 export default postRouter;

@@ -87,6 +87,10 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials." });
     }
 
+    if (user.isBanned) {
+      return res.status(403).json({ message: "You are banned from this platform" })
+    }
+
     // Generate JWT token
     const token = jwt.sign(
       { id: user._id, email: user.email },

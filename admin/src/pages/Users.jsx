@@ -38,9 +38,40 @@ const Users = () => {
     fetchUsers()
   }, [])
 
-  const toggleBan = (userId) => {
+  const toggleBan = async (userId) => {
+    // Optimistically update the UI
+    const previousState = bannedUsers[userId]
     setBannedUsers(prev => ({ ...prev, [userId]: !prev[userId] }))
-    // TODO: call ban/unban endpoint here
+
+    try {
+      const res = await fetch(`http://localhost:7000/api/admin/ban-user/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        }
+      })
+
+      if (!res.ok) {
+        throw new Error('Failed to update ban status')
+      }
+
+      const data = await res.json()
+      
+      // Confirm the state with server response
+      setBannedUsers(prev => ({
+        ...prev,
+        [userId]: data.user.isBanned
+      }))
+
+    } catch (err) {
+      console.error('Ban error:', err)
+      // Revert UI state on error
+      setBannedUsers(prev => ({
+        ...prev,
+        [userId]: previousState
+      }))
+    }
   }
 
   const filteredUsers = users.filter(user =>
@@ -83,7 +114,6 @@ const Users = () => {
   return (
     <div className="p-8 bg-gradient-to-br from-gray-900 via-gray-850 to-gray-900 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        {/* Enhanced Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2">
@@ -114,19 +144,16 @@ const Users = () => {
           </div>
         </div>
 
-        {/* Enhanced Users Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredUsers.map(user => (
             <div
               key={user._id}
               className="group bg-gradient-to-br from-gray-900 to-gray-800 hover:from-gray-900 hover:to-gray-800/80 rounded-2xl p-6 transition-all duration-300 border border-gray-700 shadow-xl hover:border-blue-500/30 relative"
             >
-              {/* Online Status */}
               {user.isOnline && (
                 <div className="absolute top-4 right-4 w-3 h-3 bg-green-400 rounded-full ring-2 ring-gray-900 animate-pulse" />
               )}
 
-              {/* Verification Badge */}
               {user.isVerified && (
                 <div className="absolute top-4 left-4 bg-blue-500/20 backdrop-blur-sm p-1.5 rounded-full border border-blue-400/30">
                   <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
@@ -135,7 +162,6 @@ const Users = () => {
                 </div>
               )}
 
-              {/* User Avatar */}
               <div className="relative mx-auto mb-4 w-20 h-20">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full blur-sm opacity-30 group-hover:opacity-50 transition-opacity" />
                 <img
@@ -145,15 +171,13 @@ const Users = () => {
                 />
               </div>
 
-              {/* User Info */}
               <h3 className="text-lg font-semibold text-gray-100 text-center mb-1">
                 {user.firstName} {user.lastName}
                 <span className="text-gray-400 text-sm block font-normal truncate">
-                  {user.jobTitle}
+                  {user.headline}
                 </span>
               </h3>
 
-              {/* Stats */}
               <div className="flex justify-center gap-4 mt-4">
                 <div className="text-center bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700">
                   <div className="text-indigo-400 font-semibold">{user.followers.length}</div>
@@ -165,7 +189,6 @@ const Users = () => {
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="mt-6 flex flex-col gap-2">
                 <button
                   onClick={() => toggleBan(user._id)}
@@ -188,7 +211,6 @@ const Users = () => {
           ))}
         </div>
 
-        {/* Enhanced Empty State */}
         {filteredUsers.length === 0 && (
           <div className="text-center py-12 bg-gray-900/50 rounded-2xl border border-gray-700 shadow-xl">
             <UsersIcon className="w-12 h-12 mx-auto mb-4 text-gray-600" />
