@@ -116,7 +116,7 @@ const loginUser = async (req, res) => {
   }
 };
 
-// Get loggined user profile
+// Get logged user profile
 const getUserProfile = async (req, res) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
@@ -168,12 +168,16 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-//get suggession users
+// Get suggested users (excluding current user)
 const getSuggestedUsers = async (req, res) => {
   try {
-    const users = await User.find()
-      .select("firstName lastName profilePic jobTitle") // Fetch only needed fields
-      .limit(10); // Limit the number of users (optional)
+    const currentUserId = req.user._id; // Assuming authentication middleware adds user to request
+    
+    const users = await User.aggregate([
+      { $match: { _id: { $ne: currentUserId } } },
+      { $sample: { size: 3 } }, // Get 3 random documents
+      { $project: { firstName: 1, lastName: 1, profilePic: 1, headline: 1 } }
+    ]);
 
     res.status(200).json(users);
   } catch (error) {

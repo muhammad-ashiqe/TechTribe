@@ -21,12 +21,10 @@ const SuggestionToFollow = () => {
         }
       });
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch suggestions');
-      }
+     console.log("suggested", response)
       
       const data = await response.json();
-      setProfiles(data.slice(0, 3)); // Show only 3 profiles
+      setProfiles(data);
     } catch (error) {
       console.error("Error fetching profiles:", error);
       setError(error.message);
@@ -36,17 +34,17 @@ const SuggestionToFollow = () => {
   };
 
   useEffect(() => {
-    fetchProfiles();
-  }, []);
+    if (token) { // Only fetch if currentUser exists
+      fetchProfiles();
+    }
+  }, [token]);
 
   const handleRefresh = () => {
-    fetchProfiles();
+    if (!loading) {
+      fetchProfiles();
+    }
   };
-
-  const handleSeeMore = () => {
-    navigate("/suggestions"); // Assuming you have a suggestions page
-  };
-
+  
   return (
     <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 shadow-2xl border border-gray-700 w-full">
       {/* Header */}
@@ -59,6 +57,7 @@ const SuggestionToFollow = () => {
         </div>
         <button 
           onClick={handleRefresh}
+          disabled={loading}
           className="p-1.5 hover:bg-gray-700/30 rounded-full transition-all duration-300"
           aria-label="Refresh suggestions"
         >
@@ -82,19 +81,15 @@ const SuggestionToFollow = () => {
           </button>
         </div>
       ) : profiles.length > 0 ? (
-        <>
-          <div className="space-y-4">
-            {profiles.map((profile) => (
-              <FollowProfileCard key={profile._id} profile={profile} />
-            ))}
-          </div>
-          <button
-            onClick={handleSeeMore}
-            className="w-full mt-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white font-medium transition-all duration-300"
-          >
-            Show More
-          </button>
-        </>
+        <div className="space-y-4">
+          {profiles.map((profile) => (
+            <FollowProfileCard  
+              key={profile._id} 
+              profile={profile}
+              // currentUserId={currentUser?._id}
+            />
+          ))}
+        </div>
       ) : (
         <div className="p-4 text-center text-gray-400 text-sm">
           No suggestions available

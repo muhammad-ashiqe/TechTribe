@@ -29,7 +29,7 @@ userRouter.post("/login", loginUser);
 
 userRouter.get("/profile", getUserProfile);
 
-userRouter.get("/suggestedUsers", getSuggestedUsers);
+userRouter.get("/suggestedUsers",authMiddleware, getSuggestedUsers);
 
 userRouter.put(
   "/update",

@@ -39,9 +39,7 @@ const ProfileCard = () => {
               className="h-24 w-24 object-cover rounded-full border-4 border-gray-900 hover:border-blue-400 transition-all duration-300 cursor-pointer shadow-xl"
               onClick={() => navigate("/myprofile")}
             />
-            <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-              <PencilIcon className="w-6 h-6 text-white" />
-            </div>
+            
           </div>
         </div>
       </div>
@@ -91,7 +89,7 @@ const ProfileCard = () => {
           onClick={() => navigate("/myprofile")}
           className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white font-medium transition-all duration-300 flex items-center justify-center gap-2"
         >
-          <PencilIcon className="w-5 h-5" />
+         
           View My Profile
         </button>
       </div>

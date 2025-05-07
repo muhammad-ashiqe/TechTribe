@@ -193,13 +193,6 @@ const MyProfile = () => {
               <PencilIcon className="w-4 h-4" />
               Edit Profile
             </button>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-400 hover:to-orange-400 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2"
-            >
-              <ArrowLeftOnRectangleIcon className="w-4 h-4" />
-              Logout
-            </button>
           </div>
         </div>
 
@@ -302,6 +295,16 @@ const MyProfile = () => {
               </div>
             )}
           </div>
+        </div>
+        <hr />
+
+        <div className="flex items-center justify-center text-center">
+          <button
+            onClick={handleLogout}
+            className="flex items-center justify-center w-full px-4 py-2  hover:bg-red-500 hover:text-white rounded-xl  transition-all duration-300 text-red-600 font-bold text-xl gap-2 cursor-pointer "
+          >
+            Logout
+          </button>
         </div>
       </div>
 
