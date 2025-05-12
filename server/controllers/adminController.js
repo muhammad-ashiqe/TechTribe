@@ -3,6 +3,24 @@ import { PostReport } from "../model/postReport.js";
 import User from "../model/userModel.js";
 import { UserReport } from "../model/userReport.js";
 import cloudinary from "../config/cloudinary.js";
+import jwt from "jsonwebtoken"
+
+//admin login 
+export const loginAdmin = async(req,res)=>{
+  const {email,password} = req.body;
+
+  if (!email || !password) {
+    return res.status(401).json({message:"provide full details"});
+  }
+
+  if (email !== process.env.ADMIN_EMAIL || password !== process.env.ADMIN_PASS) {
+    return res.status(401).json({message:"invalid credentials"});
+  }
+
+  const token = jwt.sign({email:email},process.env.JWT_SECRET);
+
+  res.status(200).json({message:"login success",token:token})
+}
 
 //status section 
 export const totalSummary = async (req, res) => {

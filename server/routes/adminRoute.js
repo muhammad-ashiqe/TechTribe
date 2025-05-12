@@ -1,7 +1,10 @@
 import express from "express"
-import { banUser, deletePost, fetchAllPosts, fetchAllUsers, getPostReports, getUserReports, latestPost, latestSignup, postPerDay, reportPerDay, totalSummary, updateReportStatus, userGrowth } from "../controllers/adminController.js";
+import { banUser, deletePost, fetchAllPosts, fetchAllUsers, getPostReports, getUserReports, latestPost, latestSignup, loginAdmin, postPerDay, reportPerDay, totalSummary, updateReportStatus, userGrowth } from "../controllers/adminController.js";
 
 const adminRouter = express.Router();
+
+//login
+adminRouter.post('/login',loginAdmin)
 
 //stats
 adminRouter.get('/dashboard/status',totalSummary);
