@@ -4,6 +4,7 @@ import { SocialContext } from "../context/context";
 import { useNavigate } from "react-router-dom";
 import { HomeIcon, BellIcon, UserCircleIcon, XMarkIcon, MagnifyingGlassIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import { HomeModernIcon, BellAlertIcon } from "@heroicons/react/24/solid";
+import logo from '../../public/tech-tribe-logo.png'
 
 const Navbar = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
@@ -38,8 +39,8 @@ const Navbar = () => {
             className="flex-shrink-0 cursor-pointer hover:opacity-90 transition-all duration-300"
             onClick={() => navigate('/')}
           >
-            <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-xl">
-              <HomeModernIcon className="w-6 h-6 text-white" />
+            <div className="">
+              <img src={logo} alt="" className="w-10"/>
             </div>
           </div>
 

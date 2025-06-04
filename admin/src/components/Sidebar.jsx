@@ -7,6 +7,8 @@ import {
   Cog6ToothIcon 
 } from '@heroicons/react/24/outline';
 
+import logo from '../../public/tech-tribe-logo.png'
+
 const links = [
   { name: 'Dashboard', path: '/dashboard', icon: <HomeIcon className="w-6 h-6" /> },
   { name: 'Users', path: '/users', icon: <UserGroupIcon className="w-6 h-6" /> },

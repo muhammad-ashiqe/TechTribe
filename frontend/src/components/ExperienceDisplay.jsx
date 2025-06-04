@@ -29,7 +29,7 @@ const ExperienceDisplay = ({ experiences, onExperienceDeleted, editable }) => {
     onExperienceDeleted(null); // Using the same prop but with null to indicate update
     setIsModalOpen(false);
     setExperienceToEdit(null);
-    toast.success("Experience updated successfully");
+    // toast.success("Experience updated successfully");
   };
 
   return (

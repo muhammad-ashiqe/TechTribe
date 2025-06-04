@@ -5,13 +5,11 @@ import {
   FileText,
   Search,
   MessageCircle,
-  Activity,
-  Share2,
-  AlertCircle,
-  MoreVertical,
   Flag,
+  MoreVertical,
   Heart,
-  BarChart2
+  BarChart2,
+  AlertCircle
 } from 'lucide-react'
 
 const Posts = () => {
@@ -36,19 +34,23 @@ const Posts = () => {
     fetchPosts()
   }, [posts])
 
- 
-  const deletePost=async(postId)=>{
+  const deletePost = async (postId) => {
     try {
-      const res = await axios.delete(`http://localhost:7000/api/admin/posts/${postId}`);
-      console.log(res)
+      await axios.delete(`http://localhost:7000/api/admin/posts/${postId}`);
+      // Refresh posts after deletion
+      setPosts(prevPosts => prevPosts.filter(post => post._id !== postId));
     } catch (error) {
-      console.log(error)
+      console.error('Error deleting post:', error);
     }
   }
 
-  const filteredPosts = posts.filter(post =>
-    post?.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredPosts = posts.filter(post => {
+    const query = searchQuery.toLowerCase();
+    return (
+      post?._id?.toLowerCase().includes(query) ||
+      post?.description?.toLowerCase().includes(query)
+    );
+  });
 
   const formatDate = date => new Date(date).toLocaleDateString('en-US', {
     month: 'short',
@@ -94,6 +96,7 @@ const Posts = () => {
       </div>
     )
   }
+  
   return (
     <div className="p-8 bg-gradient-to-br from-gray-900 via-gray-850 to-gray-900 min-h-screen">
       <div className="max-w-7xl mx-auto">
@@ -120,7 +123,7 @@ const Posts = () => {
             <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search posts..."
+              placeholder="Search by ID or content..."
               className="w-full pl-10 pr-4 py-2.5 bg-gray-900 rounded-xl text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 border border-gray-700"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
@@ -159,6 +162,11 @@ const Posts = () => {
                   <button className="text-gray-400 hover:text-gray-100 p-1 rounded-lg hover:bg-gray-700/50">
                     <MoreVertical className="w-5 h-5" />
                   </button>
+                </div>
+
+                {/* Post ID Badge */}
+                <div className="mb-3 bg-gray-800/30 px-3 py-1.5 rounded-lg border border-gray-700 w-fit">
+                  <span className="text-xs text-gray-400 font-mono">ID: {post._id}</span>
                 </div>
 
                 {/* Post Content */}
@@ -218,10 +226,9 @@ const Posts = () => {
                     Analyze
                   </Link>
                   <button 
-                  
-                  onClick={()=>deletePost(post._id)}
-                  
-                  className="px-4 py-2 bg-red-700/50 hover:bg-red-700/70 text-gray-300 rounded-xl transition-colors text-sm font-medium border border-red-600/50">
+                    onClick={() => deletePost(post._id)}
+                    className="px-4 py-2 bg-red-700/50 hover:bg-red-700/70 text-gray-300 rounded-xl transition-colors text-sm font-medium border border-red-600/50"
+                  >
                     Delete
                   </button>
                 </div>

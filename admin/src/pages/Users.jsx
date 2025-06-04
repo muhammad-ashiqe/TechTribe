@@ -39,7 +39,6 @@ const Users = () => {
   }, [])
 
   const toggleBan = async (userId) => {
-    // Optimistically update the UI
     const previousState = bannedUsers[userId]
     setBannedUsers(prev => ({ ...prev, [userId]: !prev[userId] }))
 
@@ -52,31 +51,28 @@ const Users = () => {
         }
       })
 
-      if (!res.ok) {
-        throw new Error('Failed to update ban status')
-      }
-
-      const data = await res.json()
+      if (!res.ok) throw new Error('Failed to update ban status')
       
-      // Confirm the state with server response
-      setBannedUsers(prev => ({
-        ...prev,
-        [userId]: data.user.isBanned
-      }))
+      const data = await res.json()
+      setBannedUsers(prev => ({ ...prev, [userId]: data.user.isBanned }))
 
     } catch (err) {
       console.error('Ban error:', err)
-      // Revert UI state on error
-      setBannedUsers(prev => ({
-        ...prev,
-        [userId]: previousState
-      }))
+      setBannedUsers(prev => ({ ...prev, [userId]: previousState }))
     }
   }
 
-  const filteredUsers = users.filter(user =>
-    `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  // Enhanced search to include both name and ID
+  const filteredUsers = users.filter(user => {
+    const query = searchQuery.toLowerCase();
+    const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+    
+    return (
+      user?._id?.toLowerCase().includes(query) ||
+      fullName.includes(query) ||
+      user?.email?.toLowerCase().includes(query)
+    );
+  });
 
   if (loading) {
     return (
@@ -136,7 +132,7 @@ const Users = () => {
             <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search users..."
+              placeholder="Search by ID, name or email..."
               className="w-full pl-10 pr-4 py-2.5 bg-gray-900 rounded-xl text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 border border-gray-700"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -157,7 +153,7 @@ const Users = () => {
               {user.isVerified && (
                 <div className="absolute top-4 left-4 bg-blue-500/20 backdrop-blur-sm p-1.5 rounded-full border border-blue-400/30">
                   <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 a0.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                    <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
                   </svg>
                 </div>
               )}
@@ -171,20 +167,28 @@ const Users = () => {
                 />
               </div>
 
+              {/* User ID badge
+              <div className="absolute top-4 right-10 bg-gray-800/30 px-2 py-1 rounded-lg border border-gray-700">
+                <span className="text-xs text-gray-400 font-mono truncate max-w-[100px]">{user._id.substring(0, 6)}...</span>
+              </div> */}
+
               <h3 className="text-lg font-semibold text-gray-100 text-center mb-1">
                 {user.firstName} {user.lastName}
                 <span className="text-gray-400 text-sm block font-normal truncate">
-                  {user.headline}
+                  {user.headline || 'No headline'}
+                </span>
+                <span className="text-gray-500 text-xs block font-mono truncate mt-1">
+                  {user.email}
                 </span>
               </h3>
 
               <div className="flex justify-center gap-4 mt-4">
                 <div className="text-center bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700">
-                  <div className="text-indigo-400 font-semibold">{user.followers.length}</div>
+                  <div className="text-indigo-400 font-semibold">{user.followers?.length || 0}</div>
                   <div className="text-xs text-gray-400">Followers</div>
                 </div>
                 <div className="text-center bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700">
-                  <div className="text-purple-400 font-semibold">{user.following.length}</div>
+                  <div className="text-purple-400 font-semibold">{user.following?.length || 0}</div>
                   <div className="text-xs text-gray-400">Following</div>
                 </div>
               </div>
