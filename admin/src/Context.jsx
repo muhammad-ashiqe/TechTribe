@@ -7,6 +7,8 @@ export const SocialContextProvider = ({ children }) => {
   const [adminToken, setAdminToken] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
 
+  const baseUrl = "http://localhost:7000/api";
+
   // Check for existing token on mount and storage changes
   useEffect(() => {
     const checkAuth = () => {
@@ -34,7 +36,7 @@ export const SocialContextProvider = ({ children }) => {
     adminToken,
     setAdminToken,
     authChecked,
-    logout
+    logout,baseUrl
   };
 
   return (

@@ -8,7 +8,8 @@ const AdminLogin = () => {
   const { setAdminToken } = useContext(SocialContext);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); 
+   const {baseUrl} = useContext(SocialContext)
 
   const loginAdmin = async (e) => {
     e.preventDefault();
@@ -17,7 +18,7 @@ const AdminLogin = () => {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:7000/api/admin/login",
+        `${baseUrl}/admin/login`,
         formData
       );
       

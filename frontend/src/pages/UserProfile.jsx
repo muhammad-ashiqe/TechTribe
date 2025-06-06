@@ -306,13 +306,17 @@ const UserProfile = () => {
                   )}
                 </div>
               </button>
-              <button className="px-6 py-3 rounded-xl bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500 transition-all duration-300">
+
+              {/* message button */}
+              {/* <button className="px-6 py-3 rounded-xl bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500 transition-all duration-300">
                 <div className="flex items-center gap-2">
                   <ChatBubbleOvalLeftIcon className="w-5 h-5" />
                   Message
                 </div>
-              </button>
+              </button> */}
               {/* Report User Button */}
+
+              
               <button
                 onClick={() => setShowReportModal(true)}
                 className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-600/20 hover:to-red-700/20 text-red-400 transition-all duration-300"

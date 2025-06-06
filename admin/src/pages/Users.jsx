@@ -1,72 +1,78 @@
-import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState, useEffect, useContext } from "react";
+import { Link } from "react-router-dom";
 import {
   Users as UsersIcon,
   UserPlus,
   Search,
   Shield,
   Activity,
-  AlertCircle
-} from 'lucide-react'
+  AlertCircle,
+} from "lucide-react";
+import { SocialContext } from "../Context";
 
 const Users = () => {
-  const [users, setUsers] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [bannedUsers, setBannedUsers] = useState({})
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [bannedUsers, setBannedUsers] = useState({});
+  const { baseUrl } = useContext(SocialContext);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch('http://localhost:7000/api/admin/fetch-all-users')
-        if (!res.ok) throw new Error('Failed to fetch users')
-        const data = await res.json()
-        setUsers(data)
-        const initialBans = {}
-        data.forEach(u => {
-          initialBans[u._id] = !!u.isBanned
-        })
-        setBannedUsers(initialBans)
+        const res = await fetch(
+          `${baseUrl}/admin/fetch-all-users`
+        );
+        if (!res.ok) throw new Error("Failed to fetch users");
+        const data = await res.json();
+        setUsers(data);
+        const initialBans = {};
+        data.forEach((u) => {
+          initialBans[u._id] = !!u.isBanned;
+        });
+        setBannedUsers(initialBans);
       } catch (err) {
-        setError(err.message)
+        setError(err.message);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchUsers()
-  }, [])
+    fetchUsers();
+  }, []);
 
   const toggleBan = async (userId) => {
-    const previousState = bannedUsers[userId]
-    setBannedUsers(prev => ({ ...prev, [userId]: !prev[userId] }))
+    const previousState = bannedUsers[userId];
+    setBannedUsers((prev) => ({ ...prev, [userId]: !prev[userId] }));
 
     try {
-      const res = await fetch(`http://localhost:7000/api/admin/ban-user/${userId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+      const res = await fetch(
+        `${baseUrl}/admin/ban-user/${userId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          },
         }
-      })
+      );
 
-      if (!res.ok) throw new Error('Failed to update ban status')
-      
-      const data = await res.json()
-      setBannedUsers(prev => ({ ...prev, [userId]: data.user.isBanned }))
+      if (!res.ok) throw new Error("Failed to update ban status");
 
+      const data = await res.json();
+      setBannedUsers((prev) => ({ ...prev, [userId]: data.user.isBanned }));
     } catch (err) {
-      console.error('Ban error:', err)
-      setBannedUsers(prev => ({ ...prev, [userId]: previousState }))
+      console.error("Ban error:", err);
+      setBannedUsers((prev) => ({ ...prev, [userId]: previousState }));
     }
-  }
+  };
 
   // Enhanced search to include both name and ID
-  const filteredUsers = users.filter(user => {
+  const filteredUsers = users.filter((user) => {
     const query = searchQuery.toLowerCase();
     const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
-    
+
     return (
       user?._id?.toLowerCase().includes(query) ||
       fullName.includes(query) ||
@@ -86,7 +92,7 @@ const Users = () => {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -94,7 +100,9 @@ const Users = () => {
       <div className="p-8 bg-gray-900 min-h-screen flex items-center justify-center">
         <div className="max-w-md bg-gray-800 p-6 rounded-2xl text-center">
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-100 mb-2">Loading Error</h2>
+          <h2 className="text-xl font-semibold text-gray-100 mb-2">
+            Loading Error
+          </h2>
           <p className="text-gray-400 mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
@@ -104,7 +112,7 @@ const Users = () => {
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -122,7 +130,13 @@ const Users = () => {
               </div>
               <div className="flex items-center gap-2 bg-gray-800/50 px-3 py-1.5 rounded-lg border border-gray-700">
                 <Activity className="w-5 h-5 text-green-400" />
-                <span>{users.filter(u => u.lastActive > Date.now() - 86400000).length} Active Today</span>
+                <span>
+                  {
+                    users.filter((u) => u.lastActive > Date.now() - 86400000)
+                      .length
+                  }{" "}
+                  Active Today
+                </span>
               </div>
             </div>
           </div>
@@ -141,7 +155,7 @@ const Users = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredUsers.map(user => (
+          {filteredUsers.map((user) => (
             <div
               key={user._id}
               className="group bg-gradient-to-br from-gray-900 to-gray-800 hover:from-gray-900 hover:to-gray-800/80 rounded-2xl p-6 transition-all duration-300 border border-gray-700 shadow-xl hover:border-blue-500/30 relative"
@@ -152,8 +166,16 @@ const Users = () => {
 
               {user.isVerified && (
                 <div className="absolute top-4 left-4 bg-blue-500/20 backdrop-blur-sm p-1.5 rounded-full border border-blue-400/30">
-                  <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                  <svg
+                    className="w-4 h-4 text-blue-400"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </div>
               )}
@@ -175,7 +197,7 @@ const Users = () => {
               <h3 className="text-lg font-semibold text-gray-100 text-center mb-1">
                 {user.firstName} {user.lastName}
                 <span className="text-gray-400 text-sm block font-normal truncate">
-                  {user.headline || 'No headline'}
+                  {user.headline || "No headline"}
                 </span>
                 <span className="text-gray-500 text-xs block font-mono truncate mt-1">
                   {user.email}
@@ -184,11 +206,15 @@ const Users = () => {
 
               <div className="flex justify-center gap-4 mt-4">
                 <div className="text-center bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700">
-                  <div className="text-indigo-400 font-semibold">{user.followers?.length || 0}</div>
+                  <div className="text-indigo-400 font-semibold">
+                    {user.followers?.length || 0}
+                  </div>
                   <div className="text-xs text-gray-400">Followers</div>
                 </div>
                 <div className="text-center bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700">
-                  <div className="text-purple-400 font-semibold">{user.following?.length || 0}</div>
+                  <div className="text-purple-400 font-semibold">
+                    {user.following?.length || 0}
+                  </div>
                   <div className="text-xs text-gray-400">Following</div>
                 </div>
               </div>
@@ -198,11 +224,11 @@ const Users = () => {
                   onClick={() => toggleBan(user._id)}
                   className={`w-full py-2 rounded-xl transition-all text-sm font-medium border ${
                     bannedUsers[user._id]
-                      ? 'bg-green-600/20 hover:bg-green-600/30 text-green-400 border-green-400/30'
-                      : 'bg-red-600/20 hover:bg-red-600/30 text-red-400 border-red-400/30'
+                      ? "bg-green-600/20 hover:bg-green-600/30 text-green-400 border-green-400/30"
+                      : "bg-red-600/20 hover:bg-red-600/30 text-red-400 border-red-400/30"
                   }`}
                 >
-                  {bannedUsers[user._id] ? 'Unban User' : 'Ban User'}
+                  {bannedUsers[user._id] ? "Unban User" : "Ban User"}
                 </button>
                 <Link
                   to={`/users/${user._id}`}
@@ -223,7 +249,7 @@ const Users = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Users
+export default Users;

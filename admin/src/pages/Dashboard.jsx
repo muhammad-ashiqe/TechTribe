@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import {
   AreaChart,
   Area,
@@ -16,6 +16,7 @@ import {
   UserPlusIcon,
   DocumentTextIcon
 } from '@heroicons/react/24/outline'
+import { SocialContext } from '../Context'
 
 const iconMap = {
   users: <UserGroupIcon className="text-blue-400 w-6 h-6" />,
@@ -35,8 +36,9 @@ export default function Dashboard() {
   const [recentPosts, setRecentPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const {baseUrl} = useContext(SocialContext)
 
-  const base = 'http://localhost:7000/api/admin/dashboard'
+  const base = `${baseUrl}/admin/dashboard`
   
   useEffect(() => {
     const fetchDashboardData = async () => {

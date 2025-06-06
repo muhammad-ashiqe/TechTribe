@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Flag,
   User,
@@ -11,6 +11,7 @@ import {
   ShieldAlert,
   ChevronDown,
 } from "lucide-react";
+import { SocialContext } from "../Context";
 
 const Reports = () => {
   const [reports, setReports] = useState([]);
@@ -19,14 +20,15 @@ const Reports = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("post");
   const [openDropdownId, setOpenDropdownId] = useState(null);
+     const {baseUrl} = useContext(SocialContext)
 
   useEffect(() => {
     const fetchReports = async () => {
       try {
         const endpoint =
           filterType === "post"
-            ? "http://localhost:7000/api/admin/reports/posts"
-            : "http://localhost:7000/api/admin/reports/users";
+            ? `${baseUrl}/admin/reports/posts`
+            : `${baseUrl}/admin/reports/users`;
 
         const res = await fetch(endpoint);
         if (!res.ok) throw new Error("Failed to fetch reports");
@@ -45,7 +47,7 @@ const Reports = () => {
   const handleStatusUpdate = async (reportId, newStatus) => {
     try {
       const res = await fetch(
-        `http://localhost:7000/api/admin/reports/${reportId}/status`,
+        `${baseUrl}/admin/reports/${reportId}/status`,
         {
           method: "PATCH",
           headers: {

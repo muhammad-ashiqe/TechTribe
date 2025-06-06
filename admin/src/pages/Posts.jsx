@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import axios from 'axios'
+import React, { useState, useEffect, useContext } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
 import {
   FileText,
   Search,
@@ -9,42 +9,46 @@ import {
   MoreVertical,
   Heart,
   BarChart2,
-  AlertCircle
-} from 'lucide-react'
+  AlertCircle,
+} from "lucide-react";
+import { SocialContext } from "../Context";
 
 const Posts = () => {
-  const [posts, setPosts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { baseUrl } = useContext(SocialContext);
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const res = await fetch('http://localhost:7000/api/admin/fetch-all-posts')
-        if (!res.ok) throw new Error('Failed to fetch posts')
-        const data = await res.json()
-        setPosts(data)
+        const res = await fetch(
+          `${baseUrl}/admin/fetch-all-posts`
+        );
+        if (!res.ok) throw new Error("Failed to fetch posts");
+        const data = await res.json();
+        setPosts(data);
       } catch (err) {
-        setError(err.message)
+        setError(err.message);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchPosts()
-  }, [posts])
+    };
+    fetchPosts();
+  }, [posts]);
 
   const deletePost = async (postId) => {
     try {
-      await axios.delete(`http://localhost:7000/api/admin/posts/${postId}`);
+      await axios.delete(`${baseUrl}/admin/posts/${postId}`);
       // Refresh posts after deletion
-      setPosts(prevPosts => prevPosts.filter(post => post._id !== postId));
+      setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
     } catch (error) {
-      console.error('Error deleting post:', error);
+      console.error("Error deleting post:", error);
     }
-  }
+  };
 
-  const filteredPosts = posts.filter(post => {
+  const filteredPosts = posts.filter((post) => {
     const query = searchQuery.toLowerCase();
     return (
       post?._id?.toLowerCase().includes(query) ||
@@ -52,12 +56,13 @@ const Posts = () => {
     );
   });
 
-  const formatDate = date => new Date(date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+  const formatDate = (date) =>
+    new Date(date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
   if (loading) {
     return (
@@ -78,7 +83,7 @@ const Posts = () => {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -86,17 +91,21 @@ const Posts = () => {
       <div className="p-8 bg-gray-900 min-h-screen flex items-center justify-center">
         <div className="max-w-md bg-gray-800 p-6 rounded-2xl text-center">
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-100 mb-2">Error Loading Posts</h2>
+          <h2 className="text-xl font-semibold text-gray-100 mb-2">
+            Error Loading Posts
+          </h2>
           <p className="text-gray-400 mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg transition-colors"
-          >Retry</button>
+          >
+            Retry
+          </button>
         </div>
       </div>
-    )
+    );
   }
-  
+
   return (
     <div className="p-8 bg-gradient-to-br from-gray-900 via-gray-850 to-gray-900 min-h-screen">
       <div className="max-w-7xl mx-auto">
@@ -113,11 +122,13 @@ const Posts = () => {
               </div>
               <div className="flex items-center gap-2 bg-gray-800/50 px-3 py-1.5 rounded-lg border border-gray-700">
                 <Flag className="w-5 h-5 text-red-400" />
-                <span>{posts.filter(p => p.reports?.length > 0).length} Reported</span>
+                <span>
+                  {posts.filter((p) => p.reports?.length > 0).length} Reported
+                </span>
               </div>
             </div>
           </div>
-          
+
           <div className="relative w-full sm:w-72">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl -z-10" />
             <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
@@ -126,17 +137,20 @@ const Posts = () => {
               placeholder="Search by ID or content..."
               className="w-full pl-10 pr-4 py-2.5 bg-gray-900 rounded-xl text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 border border-gray-700"
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </div>
 
         {/* Enhanced Posts Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPosts.map(post => {
-            const user = post.user || {}
-            const userName = user.username || [user.firstName, user.lastName].filter(Boolean).join(' ') || 'Unknown User'
-            const profilePic = user.profilePic || '/default-avatar.png'
+          {filteredPosts.map((post) => {
+            const user = post.user || {};
+            const userName =
+              user.username ||
+              [user.firstName, user.lastName].filter(Boolean).join(" ") ||
+              "Unknown User";
+            const profilePic = user.profilePic || "/default-avatar.png";
 
             return (
               <div
@@ -156,7 +170,9 @@ const Posts = () => {
                     </div>
                     <div>
                       <h4 className="text-gray-100 font-medium">{userName}</h4>
-                      <span className="text-gray-400 text-xs">{formatDate(post.createdAt)}</span>
+                      <span className="text-gray-400 text-xs">
+                        {formatDate(post.createdAt)}
+                      </span>
                     </div>
                   </div>
                   <button className="text-gray-400 hover:text-gray-100 p-1 rounded-lg hover:bg-gray-700/50">
@@ -166,7 +182,9 @@ const Posts = () => {
 
                 {/* Post ID Badge */}
                 <div className="mb-3 bg-gray-800/30 px-3 py-1.5 rounded-lg border border-gray-700 w-fit">
-                  <span className="text-xs text-gray-400 font-mono">ID: {post._id}</span>
+                  <span className="text-xs text-gray-400 font-mono">
+                    ID: {post._id}
+                  </span>
                 </div>
 
                 {/* Post Content */}
@@ -186,7 +204,9 @@ const Posts = () => {
                     {post.reports?.length > 0 && (
                       <div className="absolute top-2 right-2 bg-red-500/20 backdrop-blur-sm px-2 py-1 rounded-full text-xs flex items-center gap-1 border border-red-400/30">
                         <Flag className="w-4 h-4 text-red-400" />
-                        <span className="text-red-400">{post.reports.length}</span>
+                        <span className="text-red-400">
+                          {post.reports.length}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -197,21 +217,27 @@ const Posts = () => {
                   <div className="p-2 bg-gray-800/50 hover:bg-gray-700/30 rounded-lg border border-gray-700 transition-colors cursor-pointer">
                     <div className="flex items-center justify-center gap-1 text-indigo-400">
                       <Heart className="w-4 h-4" />
-                      <span className="font-medium">{post.likes?.length || 0}</span>
+                      <span className="font-medium">
+                        {post.likes?.length || 0}
+                      </span>
                     </div>
                     <span className="text-xs text-gray-400">Likes</span>
                   </div>
                   <div className="p-2 bg-gray-800/50 hover:bg-gray-700/30 rounded-lg border border-gray-700 transition-colors cursor-pointer">
                     <div className="flex items-center justify-center gap-1 text-green-400">
                       <MessageCircle className="w-4 h-4" />
-                      <span className="font-medium">{post.comments?.length || 0}</span>
+                      <span className="font-medium">
+                        {post.comments?.length || 0}
+                      </span>
                     </div>
                     <span className="text-xs text-gray-400">Comments</span>
                   </div>
                   <div className="p-2 bg-gray-800/50 hover:bg-gray-700/30 rounded-lg border border-gray-700 transition-colors cursor-pointer">
                     <div className="flex items-center justify-center gap-1 text-purple-400">
                       <BarChart2 className="w-4 h-4" />
-                      <span className="font-medium">{post.shares?.length || 0}</span>
+                      <span className="font-medium">
+                        {post.shares?.length || 0}
+                      </span>
                     </div>
                     <span className="text-xs text-gray-400">Shares</span>
                   </div>
@@ -225,7 +251,7 @@ const Posts = () => {
                   >
                     Analyze
                   </Link>
-                  <button 
+                  <button
                     onClick={() => deletePost(post._id)}
                     className="px-4 py-2 bg-red-700/50 hover:bg-red-700/70 text-gray-300 rounded-xl transition-colors text-sm font-medium border border-red-600/50"
                   >
@@ -233,7 +259,7 @@ const Posts = () => {
                   </button>
                 </div>
               </div>
-            )
+            );
           })}
         </div>
 
@@ -241,12 +267,14 @@ const Posts = () => {
         {filteredPosts.length === 0 && (
           <div className="text-center py-12 bg-gray-900/50 rounded-2xl border border-gray-700 shadow-xl">
             <FileText className="w-12 h-12 mx-auto mb-4 text-gray-600" />
-            <p className="text-gray-400">No posts found matching your criteria</p>
+            <p className="text-gray-400">
+              No posts found matching your criteria
+            </p>
           </div>
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Posts
+export default Posts;
