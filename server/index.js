@@ -5,6 +5,7 @@ import ConnectDB from "./config/db.js";
 import userRouter from "./routes/userRoutes.js";
 import postRouter from "./routes/postRoute.js";
 import { adminRouter } from "./routes/adminRoute.js";
+import { healthCheckRouter } from "./routes/healthCheckRoute.js";
 
 //env
 configDotenv();
@@ -22,6 +23,9 @@ app.use(cors());
 app.get("/", (req, res) => {
   res.send("api is working");
 });
+
+//health check
+app.use('/api/server',healthCheckRouter)
 
 //user routes
 app.use("/api/user", userRouter);
