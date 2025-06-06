@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { FiHeart, FiMessageCircle, FiSend, FiSmile } from 'react-icons/fi';
 import EmojiPicker from 'emoji-picker-react';
+import { useContext } from 'react';
+import { SocialContext } from '../context/context';
 
 const PostWithComments = () => {
   const { postId } = useParams();
@@ -12,6 +14,7 @@ const PostWithComments = () => {
   const [loading, setLoading] = useState(true);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef(null);
+  const {baseUrl} = useContext(SocialContext)
 
   const getUserId = () => {
     const token = localStorage.getItem('token');
@@ -34,7 +37,7 @@ const PostWithComments = () => {
   useEffect(() => {
     const fetchPostAndComments = async () => {
       try {
-        const response = await axios.get(`http://localhost:7000/api/post/${postId}`, {
+        const response = await axios.get(`${baseUrl}/post/${postId}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         setPost(response.data);
@@ -55,7 +58,7 @@ const PostWithComments = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:7000/api/post/${postId}/comment`,
+        `${baseUrl}/post/${postId}/comment`,
         { text: newComment },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       )
