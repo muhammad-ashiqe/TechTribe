@@ -10,7 +10,7 @@ export const SocialContextProvider = ({ children }) => {
   const [token, setToken] = useState(() =>
     localStorage.getItem("token")
   );
-  const baseUrl = "https://techtribe-backend.onrender.com/api";
+  const baseUrl = "http://localhost:7000/api";
 
   useEffect(() => {
     const stored = localStorage.getItem("token");

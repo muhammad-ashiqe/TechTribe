@@ -71,11 +71,11 @@ const Navbar = () => {
 
           {/* Notifications */}
           <div className="relative group">
-            <button className="p-2 hover:bg-gray-700/30 rounded-full transition-all duration-300">
+            <button onClick={()=>navigate('/notifications')} className="p-2 hover:bg-gray-700/30 rounded-full transition-all duration-300">
               <BellIcon className="w-6 h-6 text-gray-400 group-hover:text-blue-400" />
-              <div className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow">
-                3
-              </div>
+              {/* <div className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow">
+                
+              </div> */}
             </button>
           </div>
 

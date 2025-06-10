@@ -31,7 +31,8 @@ const UserSchema = new mongoose.Schema(
     password: { type: String, required: true, minlength: 6 },
     profilePic: {
       type: String,
-      default: "https://www.shutterstock.com/image-vector/avatar-gender-neutral-silhouette-vector-600nw-2470054311.jpg",
+      default:
+        "https://www.shutterstock.com/image-vector/avatar-gender-neutral-silhouette-vector-600nw-2470054311.jpg",
       trim: true,
     },
     coverPhoto: {
@@ -55,6 +56,11 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: String,
   },
   { timestamps: true, minimize: false }
 );

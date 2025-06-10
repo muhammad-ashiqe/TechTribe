@@ -7,6 +7,8 @@ import { ToastContainer, toast } from "react-toastify";
 import MyProfile from "./pages/MyProfile";
 import PostWithComments from "./pages/PostWithComments";
 import UserProfile from "./pages/UserProfile";
+import VerifyEmail from "./pages/VerifyEmail";
+import Notifications from "./pages/Notifications";
 
 function App() {
   return (
@@ -24,10 +26,12 @@ function App() {
       <Routes>
         <Route path="/landing" element={<LandingPage />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         {/* Protected Home Page */}
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Home />} />
           <Route path="/myprofile" element={<MyProfile />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/post/:postId" element={<PostWithComments />} />
           <Route path="/profile/:userId" element={<UserProfile />} />
         </Route>

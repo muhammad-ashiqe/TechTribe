@@ -9,11 +9,13 @@ import {
   loginUser,
   registerUser,
   reportUser,
+  resendVerificationEmail,
   searchUser,
   unfollowUser,
   updateExperience,
   updateSkills,
   updateUserProfile,
+  verifyEmail,
 } from "../controllers/userController.js";
 import upload from "../middleware/multer.js";
 import authMiddleware from "../middleware/authMiddleware.js";
@@ -26,6 +28,10 @@ const userRouter = express.Router();
 userRouter.post("/register", registerUser);
 
 userRouter.post("/login", loginUser);
+
+userRouter.get('/verify-email', verifyEmail);
+
+userRouter.post('/resend-verification', resendVerificationEmail);
 
 userRouter.get("/profile", getUserProfile);
 

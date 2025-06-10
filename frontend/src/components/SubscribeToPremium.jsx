@@ -1,7 +1,12 @@
 import React from "react";
 import { SparklesIcon } from "@heroicons/react/24/solid";
+import { toast } from "react-toastify";
 
 const SubscribeToPremium = () => {
+
+ const handleClick = ()=>{
+  toast.info('🔒 It will be available in an upcoming update.')
+  }
   return (
     <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 border border-gray-700 shadow-2xl relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10"></div>
@@ -28,7 +33,7 @@ const SubscribeToPremium = () => {
           </li>
         </ul>
 
-        <button className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white font-medium flex items-center justify-center gap-2 transition-all duration-300 group">
+        <button onClick={()=>handleClick()} className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white font-medium flex items-center justify-center gap-2 transition-all duration-300 group">
           <span>Upgrade Now</span>
           <SparklesIcon className="w-5 h-5 text-yellow-300 group-hover:animate-pulse" />
         </button>

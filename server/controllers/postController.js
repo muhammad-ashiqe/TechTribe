@@ -64,7 +64,7 @@ export const getAllPost = async (req, res) => {
       username: `${post.user?.firstName || "Unknown"} ${
         post.user?.lastName || ""
       }`.trim(),
-      userId:post.user._id,
+      userId:post?.user?._id,
       headline: post.user?.headline || "No Job Title",
       profilePic:
         post.user?.profilePic ||

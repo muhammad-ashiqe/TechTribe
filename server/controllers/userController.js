@@ -4,12 +4,17 @@ import jwt from "jsonwebtoken";
 import cloudinary from "../config/cloudinary.js";
 import mongoose from "mongoose";
 import Post from "../model/postModel.js";
-import {UserReport} from "../model/userReport.js";
+import { UserReport } from "../model/userReport.js";
+import crypto from "crypto";
+import { sendVerificationEmail } from "../utils/emailSender.js";
 
 // User registration
 const registerUser = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
+
+    console.log("Email:", process.env.EMAIL_USER);
+    console.log("Password:", process.env.EMAIL_PASS ? "Exists" : "Missing");
 
     // Validate required fields
     if (!firstName || !lastName || !email || !password) {
@@ -26,40 +31,56 @@ const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    // Generate verification token
+    const verificationToken = crypto.randomBytes(20).toString("hex");
+
     // Create a new user
     const newUser = new User({
       firstName,
       lastName,
       email,
       password: hashedPassword,
+      verificationToken,
     });
 
     await newUser.save();
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { id: newUser._id, email: newUser.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "3d" }
-    );
-
-    // Omit sensitive data from the response
-    const userResponse = {
-      _id: newUser._id,
-      firstName: newUser.firstName,
-      lastName: newUser.lastName,
-      email: newUser.email,
-      profilePic: newUser.profilePic,
-    };
+    // Send verification email
+    await sendVerificationEmail(newUser.email, verificationToken);
 
     res.status(201).json({
-      message: "User registered successfully",
-      token,
-      user: userResponse,
+      message: "Verification email sent. Please check your inbox.",
     });
   } catch (error) {
     console.error("Error in registerUser:", error);
     res.status(500).json({ message: "Server error. Please try again later." });
+  }
+};
+
+// Email verification
+const verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({ message: "Missing verification token" });
+    }
+
+    const user = await User.findOne({ verificationToken: token });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid verification token" });
+    }
+
+    // Update user as verified
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    await user.save();
+
+    res.status(200).json({ message: "Email verified successfully!" });
+  } catch (error) {
+    console.error("Error in verifyEmail:", error);
+    res.status(500).json({ message: "Error verifying email" });
   }
 };
 
@@ -87,8 +108,18 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials." });
     }
 
+    // Check if email is verified
+    if (!user.isVerified) {
+      return res.status(403).json({
+        message:
+          "Email not verified. Please check your inbox for verification instructions.",
+      });
+    }
+
     if (user.isBanned) {
-      return res.status(403).json({ message: "You are banned from this platform" })
+      return res
+        .status(403)
+        .json({ message: "You are banned from this platform" });
     }
 
     // Generate JWT token
@@ -107,12 +138,48 @@ const loginUser = async (req, res) => {
       profilePic: user.profilePic,
     };
 
-    res
-      .status(200)
-      .json({ message: "Login successful", token, user: userResponse });
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: userResponse,
+    });
   } catch (error) {
     console.error("Error in loginUser:", error);
     res.status(500).json({ message: "Server error. Please try again later." });
+  }
+};
+
+// Resend verification email
+export const resendVerificationEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ message: "Email is already verified" });
+    }
+
+    // Generate new verification token
+    const verificationToken = crypto.randomBytes(20).toString("hex");
+    user.verificationToken = verificationToken;
+    await user.save();
+
+    // Resend email
+    await sendVerificationEmail(user.email, verificationToken);
+
+    res.status(200).json({ message: "Verification email resent" });
+  } catch (error) {
+    console.error("Error in resendVerificationEmail:", error);
+    res.status(500).json({ message: "Error resending verification email" });
   }
 };
 
@@ -172,11 +239,11 @@ const getUserProfile = async (req, res) => {
 const getSuggestedUsers = async (req, res) => {
   try {
     const currentUserId = req.user._id; // Assuming authentication middleware adds user to request
-    
+
     const users = await User.aggregate([
       { $match: { _id: { $ne: currentUserId } } },
       { $sample: { size: 3 } }, // Get 3 random documents
-      { $project: { firstName: 1, lastName: 1, profilePic: 1, headline: 1 } }
+      { $project: { firstName: 1, lastName: 1, profilePic: 1, headline: 1 } },
     ]);
 
     res.status(200).json(users);
@@ -290,21 +357,22 @@ const updateSkills = async (req, res) => {
   }
 };
 
-
 // Add new experience
 const addExperience = async (req, res) => {
   try {
     const { title, company, period, description } = req.body;
-    
+
     if (!title || !company || !period) {
-      return res.status(400).json({ message: "Title, company and period are required" });
+      return res
+        .status(400)
+        .json({ message: "Title, company and period are required" });
     }
 
     const newExperience = {
       title,
       company,
       period,
-      description: description || ""
+      description: description || "",
     };
 
     const user = await User.findByIdAndUpdate(
@@ -320,7 +388,6 @@ const addExperience = async (req, res) => {
   }
 };
 
-
 // Update experience
 const updateExperience = async (req, res) => {
   try {
@@ -328,7 +395,9 @@ const updateExperience = async (req, res) => {
     const { title, company, period, description } = req.body;
 
     if (!title || !company || !period) {
-      return res.status(400).json({ message: "Title, company and period are required" });
+      return res
+        .status(400)
+        .json({ message: "Title, company and period are required" });
     }
 
     const user = await User.findOneAndUpdate(
@@ -338,8 +407,8 @@ const updateExperience = async (req, res) => {
           "experiences.$.title": title,
           "experiences.$.company": company,
           "experiences.$.period": period,
-          "experiences.$.description": description || ""
-        }
+          "experiences.$.description": description || "",
+        },
       },
       { new: true }
     );
@@ -377,7 +446,6 @@ const deleteExperience = async (req, res) => {
   }
 };
 
-
 //searchUser
 const searchUser = async (req, res) => {
   try {
@@ -404,43 +472,43 @@ const searchUser = async (req, res) => {
   }
 };
 
-//get user with id 
-const getUserWithId =  async (req, res) => {
+//get user with id
+const getUserWithId = async (req, res) => {
   try {
     const { userId } = req.params;
 
     // Validate userId format
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: 'Invalid user ID' });
+      return res.status(400).json({ message: "Invalid user ID" });
     }
 
     // Fetch user data
     const user = await User.findById(userId)
-      .select('-password') // Exclude sensitive fields
+      .select("-password") // Exclude sensitive fields
       .lean(); // Convert to plain JavaScript object
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     // Fetch user's posts
     const posts = await Post.find({ author: userId })
       .sort({ createdAt: -1 }) // Newest first
-      .populate('author', 'firstName lastName profilePic') // Include author details
+      .populate("author", "firstName lastName profilePic") // Include author details
       .lean();
 
     // Combine user data with posts
     const response = {
       ...user,
-      posts
+      posts,
     };
 
     res.json(response);
   } catch (error) {
-    console.error('Error fetching user profile:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ message: "Server error" });
   }
-}
+};
 
 const followUser = async (req, res) => {
   try {
@@ -473,7 +541,7 @@ const followUser = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-}
+};
 
 const unfollowUser = async (req, res) => {
   try {
@@ -497,10 +565,10 @@ const unfollowUser = async (req, res) => {
 
     // Update both users
     currentUser.following = currentUser.following.filter(
-      id => id.toString() !== req.params.userId
+      (id) => id.toString() !== req.params.userId
     );
     userToUnfollow.followers = userToUnfollow.followers.filter(
-      id => id.toString() !== req.user._id.toString()
+      (id) => id.toString() !== req.user._id.toString()
     );
 
     await currentUser.save();
@@ -510,7 +578,7 @@ const unfollowUser = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-}
+};
 
 const reportUser = async (req, res) => {
   try {
@@ -531,25 +599,24 @@ const reportUser = async (req, res) => {
     const newReport = new UserReport({
       reportedBy,
       reportedUser: reportedUserId,
-      reason
+      reason,
     });
 
     await newReport.save();
 
     res.status(201).json({
       message: "User report submitted successfully",
-      report: newReport
+      report: newReport,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-
-
 export {
   registerUser,
   loginUser,
+  verifyEmail,
   getUserProfile,
   getSuggestedUsers,
   updateUserProfile,
@@ -561,5 +628,5 @@ export {
   deleteExperience,
   followUser,
   unfollowUser,
-  reportUser
+  reportUser,
 };

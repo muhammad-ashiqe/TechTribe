@@ -8,12 +8,14 @@ import { PhotoIcon, DocumentTextIcon, PlusCircleIcon, ArrowPathIcon } from "@her
 const CreatePost = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { baseUrl, token } = useContext(SocialContext);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
+        setIsLoading(true);
         if (!token) {
           console.error("No token found. User must log in.");
           return;
@@ -24,20 +26,62 @@ const CreatePost = () => {
         setUser(data);
       } catch (error) {
         console.error("Error fetching user profile:", error.response?.data?.message || error.message);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchUserProfile();
-  }, []);
+  }, [token, baseUrl]);
 
   const handleOptionClick = () => setIsModalOpen(true);
 
-  if (!user) return (
-    <div className="p-4 bg-gray-900/50 rounded-2xl text-center text-gray-400 flex items-center justify-center gap-2">
-      <ArrowPathIcon className="w-5 h-5 animate-spin" />
-      Loading...
-    </div>
-  );
+  // Skeleton Loading State
+  if (isLoading) {
+    return (
+      <div className="w-full p-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl border border-gray-700 animate-pulse">
+        {/* Top Section Skeleton */}
+        <div className="flex items-center gap-4">
+          {/* Avatar Skeleton */}
+          <div className="w-14 h-14 rounded-full bg-gray-700 border-2 border-gray-700" />
+          
+          {/* Input Field Skeleton */}
+          <div className="flex-1">
+            <div className="w-full p-4 bg-gray-800/70 rounded-xl border border-gray-700 h-[56px]" />
+          </div>
+          
+          {/* Post Button Skeleton */}
+          <div className="p-3 bg-gray-700 rounded-xl w-12 h-12" />
+        </div>
+        
+        {/* Divider */}
+        <div className="my-4 border-t border-gray-700"></div>
+        
+        {/* Bottom Options Skeleton */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex items-center gap-3 w-full sm:w-auto px-6 py-3 rounded-xl bg-gray-800/50">
+            <div className="w-6 h-6 bg-gray-700 rounded" />
+            <div className="h-4 bg-gray-700 rounded w-24" />
+          </div>
+          
+          <div className="flex items-center gap-3 w-full sm:w-auto px-6 py-3 rounded-xl bg-gray-800/50">
+            <div className="w-6 h-6 bg-gray-700 rounded" />
+            <div className="h-4 bg-gray-700 rounded w-24" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error State
+  if (!user) {
+    return (
+      <div className="p-4 bg-gray-900/50 rounded-2xl text-center text-gray-400 flex items-center justify-center gap-2">
+        <ArrowPathIcon className="w-5 h-5 animate-spin" />
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div className="w-full p-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl border border-gray-700 ">

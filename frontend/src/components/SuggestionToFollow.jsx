@@ -21,8 +21,6 @@ const SuggestionToFollow = () => {
         }
       });
       
-     console.log("suggested", response)
-      
       const data = await response.json();
       setProfiles(data);
     } catch (error) {
@@ -34,7 +32,7 @@ const SuggestionToFollow = () => {
   };
 
   useEffect(() => {
-    if (token) { // Only fetch if currentUser exists
+    if (token) {
       fetchProfiles();
     }
   }, [token]);
@@ -44,6 +42,23 @@ const SuggestionToFollow = () => {
       fetchProfiles();
     }
   };
+
+  // Skeleton Loading Component
+  const ProfileSkeleton = () => (
+    <div className="flex items-center justify-between p-3 animate-pulse">
+      <div className="flex items-center gap-3 w-full">
+        {/* Avatar */}
+        <div className="w-11 h-11 rounded-full bg-gray-700"></div>
+        
+        {/* Name and username */}
+        <div className="flex-1">
+          <div className="h-4 bg-gray-700 rounded-full w-3/4 mb-2"></div>
+          <div className="h-3 bg-gray-700 rounded-full w-1/2"></div>
+        </div>
+     
+      </div>
+    </div>
+  );
   
   return (
     <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 shadow-2xl border border-gray-700 w-full">
@@ -67,8 +82,10 @@ const SuggestionToFollow = () => {
 
       {/* Content */}
       {loading ? (
-        <div className="flex justify-center py-4">
-          <ArrowPathIcon className="w-6 h-6 animate-spin text-blue-400" />
+        <div className="space-y-3">
+          {[...Array(3)].map((_, index) => (
+            <ProfileSkeleton key={index} />
+          ))}
         </div>
       ) : error ? (
         <div className="p-4 bg-red-900/50 rounded-xl flex flex-col items-center gap-3 text-red-300">
@@ -86,7 +103,6 @@ const SuggestionToFollow = () => {
             <FollowProfileCard  
               key={profile._id} 
               profile={profile}
-              // currentUserId={currentUser?._id}
             />
           ))}
         </div>

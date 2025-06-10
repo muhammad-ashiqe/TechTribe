@@ -1,12 +1,70 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SocialContext } from "../context/context";
-import { UserCircleIcon, PencilIcon, UsersIcon, BookmarkIcon,XMarkIcon } from "@heroicons/react/24/outline";
+import { UserCircleIcon, UsersIcon, BookmarkIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 const ProfileCard = () => {
   const { user } = useContext(SocialContext);
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Simulate loading state for 1.5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Skeleton Loading State
+  if (isLoading) {
+    return (
+      <div className="flex flex-col bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl border border-gray-700 overflow-hidden w-full relative">
+        {/* Cover Photo Skeleton */}
+        <div className="relative h-32 bg-gray-800 animate-pulse" />
+        
+        {/* Profile Image Skeleton */}
+        <div className="absolute bottom-76 left-1/2 transform -translate-x-1/2">
+          <div className="h-24 w-24 rounded-full bg-gray-700 border-4 border-gray-900 animate-pulse" />
+        </div>
+
+        {/* Profile Content Skeleton */}
+        <div className="pt-16 px-6 pb-6">
+          {/* User Info Skeleton */}
+          <div className="text-center space-y-3 mb-6">
+            <div className="h-6 bg-gray-700 rounded-full max-w-[180px] mx-auto animate-pulse" />
+            <div className="h-4 bg-gray-700 rounded-full max-w-[140px] mx-auto animate-pulse" />
+          </div>
+          
+          {/* Bio Skeleton */}
+          <div className="space-y-2 mb-6">
+            <div className="h-3 bg-gray-700 rounded-full animate-pulse" />
+            <div className="h-3 bg-gray-700 rounded-full animate-pulse" />
+            <div className="h-3 bg-gray-700 rounded-full w-4/5 mx-auto animate-pulse" />
+          </div>
+          
+          {/* Stats Skeleton */}
+          <div className="flex justify-around bg-gray-900/50 rounded-xl p-4 mb-6">
+            <div className="text-center">
+              <div className="h-5 bg-gray-700 rounded-full w-8 mx-auto mb-2 animate-pulse" />
+              <div className="h-3 bg-gray-700 rounded-full w-16 mx-auto animate-pulse" />
+            </div>
+            <div className="h-8 w-px bg-gray-700" />
+            <div className="text-center">
+              <div className="h-5 bg-gray-700 rounded-full w-8 mx-auto mb-2 animate-pulse" />
+              <div className="h-3 bg-gray-700 rounded-full w-16 mx-auto animate-pulse" />
+            </div>
+          </div>
+          
+          {/* Button Skeleton */}
+          <div className="w-full py-3 rounded-xl bg-gray-700 animate-pulse" />
+        </div>
+      </div>
+    );
+  }
+
+  // Error State
   if (!user) {
     return (
       <div className="p-4 bg-red-900/50 rounded-xl text-center text-red-300 flex items-center gap-2 justify-center">
@@ -16,6 +74,7 @@ const ProfileCard = () => {
     );
   }
 
+  // Actual Profile Card
   return (
     <div className="flex flex-col bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl border border-gray-700 overflow-hidden w-full relative group">
       {/* Cover Photo */}
@@ -39,7 +98,6 @@ const ProfileCard = () => {
               className="h-24 w-24 object-cover rounded-full border-4 border-gray-900 hover:border-blue-400 transition-all duration-300 cursor-pointer shadow-xl"
               onClick={() => navigate("/myprofile")}
             />
-            
           </div>
         </div>
       </div>
@@ -89,7 +147,6 @@ const ProfileCard = () => {
           onClick={() => navigate("/myprofile")}
           className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white font-medium transition-all duration-300 flex items-center justify-center gap-2"
         >
-         
           View My Profile
         </button>
       </div>
