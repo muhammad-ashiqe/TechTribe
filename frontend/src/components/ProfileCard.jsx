@@ -17,6 +17,7 @@ const ProfileCard = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // console.log('user,',user)
   // Skeleton Loading State
   if (isLoading) {
     return (

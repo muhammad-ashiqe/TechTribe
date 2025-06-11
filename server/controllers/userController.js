@@ -128,6 +128,7 @@ const loginUser = async (req, res) => {
       process.env.JWT_SECRET
     );
 
+    
     // Omit sensitive data from the response
     const userResponse = {
       _id: user._id,
